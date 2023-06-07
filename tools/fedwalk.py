@@ -386,109 +386,30 @@ options = {"-h": "Display this output",\
 		   "-st=<stringfile>:":"Import a file containing strings you wish to replace (csv or newline separated values)",\
 		   "-map=<mapfilename>":"Import IP/MAC/String mappings from other FFI program output"}
 
-def mainLoop(args: list, src_path: str, dst_path: str):
+def mainloop(args: list, src_path: str, dst_path: str):
 
-	if ((len(args) < 3) or '-' in args[2]):
-		print("Usage: \n\tpy fedwalk.py <directory> <depth> [options]")
-		print("\t\tDirectory needs to be specified. Additionally, it needs to be a directory that fedwalk is NOT in\n\t\t\
-	BE CAREFUL when using this tool, specifying the wrong directory can have drastic consequences\n\t\t\
-	<depth> needs to be an integer, a warning will be thrown if it's greater than 5\n")
-		print("Options:")
-		for k, v in options.items():
-			print(f'\t{k}: {v}')
-		sys.exit()
+	global opflags
+	opflags = args
 
-	try:
-		depth = int(args[2])
-		if depth < 0:
-			raise ValueError
-	except ValueError:
-		print("Usage: \n\tpy fedwalk.py <directory> <depth> [options]")
-		print("\t\tDirectory needs to be specified. Additionally, it needs to be a directory that fedwalk is NOT in\n\t\t\
-	BE CAREFUL when using this tool, specifying the wrong directory can have drastic consequences\n\t\t\
-	<depth> needs to be greater than or equal to zero, a warning will be thrown if it's greater than 5\n")
+	contents = None
+	r_mode = ''
+	w_mode = ''
 
-	if depth > 5:
-		uin = input("Depth value is greater than 5. Please type 'ACK' to acknowledge this. Please note, operations on large directory structures might take a long time. This is purely a safeguard measure.\n > ")
-		if uin.upper() != "ACK":
-			print("You did not type 'ACK', exiting")
-			sys.exit()
+	if is_binary(src_path):
+		r_mode = 'rb'
+		w_mode = 'wb'
+	else:
+		r_mode = 'r'
+		w_mode = 'w'
 
-	if len(args) > 3:
-		for ar in args[2:]: opflags.append(ar)
+	with open(src_path, r_mode) as rf:
+		contents = rf.readlines()
 
-	for ar in opflags:
-		if ("map=" in ar):
-			try:
-				fn = ar.split('=')[1]
-				importMap(fn)
-			except FileNotFoundError as e:
-				print(f"Could not find file/path specified: '{fn}'")
-			except IndexError:
-				print("-map option needs to be formatted like so:\n\t-map=<filename>")
-			except:
-				print("Something went wrong when importing mapfile (-map=<file> option)")
-		elif ("st=" in ar):
-			try:
-				s = ar.split('=')[1]
-				print(s)
-				importStrs(s)
-			except FileNotFoundError as e:
-				print(f"Could not find file/path specified: '{s}'")
-			except IndexError:
-				print("-st option needs to be formatted like so:\n\t-st=<filename>")
-			except:
-				print("Something went wrong when importing string (-st=<file> option)")
-
-	dirTree = []
-	try:
-		dt = buildDirTree(args[1])
-		dirTree = dt[1]
-		mtd = dt[0]
-
-	except Exception as t:
-		print(f"Something went wrong when loading the directory: {args[1]}\nPlease double check that it is correct\n")
-		print(f"\nError: {t}")
-		sys.exit()
-
-	ALLFILES = getFiles(dirTree)
-	ALLMODFILES = []
-	for f in ALLFILES:
-		a = re.search(args[1], f)
-		ALLMODFILES.append(f[:a.span()[0]] + mtd + f[a.span()[1]:])
-	'''
-	Roadmap: 
-	Have: ALLFILES -> list of target paths to the original files in the path,
-					no further than 'depth' steps deep into the directory
-		ALLMODFILES -> list of target paths in the modified directory to write
-						modified files to
-						
-	Need to do: Parse through ALLFILES, open the file and perform modifications. Open
-				corresponding files in ALLMODFILES and write modifications
-
-	Challenges: binary files :)
-	'''
-
-	for index, (path, path_mod) in enumerate(zip(ALLFILES, ALLMODFILES)):
-		contents = None
-		r_mode = ''
-		w_mode = ''
-
-		if is_binary(path):
-			r_mode = 'rb'
-			w_mode = 'wb'
-		else:
-			r_mode = 'r'
-			w_mode = 'w'
-
-		with open(path, r_mode) as rf:
-			contents = rf.readlines()
-
-		if r_mode == 'rb':
-			contents = modifyBinFile(contents)
-		
-		else:
-			contents = modifyTxtFile(contents)
-		
-		with open(path_mod, w_mode) as wf:
-			wf.writelines(contents)
+	if r_mode == 'rb':
+		contents = modifyBinFile(contents)
+	
+	else:
+		contents = modifyTxtFile(contents)
+	
+	with open(dst_path, w_mode) as wf:
+		wf.writelines(contents)

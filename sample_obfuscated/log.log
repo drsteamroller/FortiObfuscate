@@ -1,0 +1,2 @@
+sys=log user=SUPER_CRITICAL_GUY srcip=192.168.0.1 dstip=88.40.189.102
+srcip=88.40.189.102 dstip=192.168.0.1 msg="message for SUPER_CRITICAL_GUY (You're stupid)"

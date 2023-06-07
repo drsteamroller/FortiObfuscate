@@ -238,6 +238,7 @@ def obf_on_submit():
 
     set_repl_dicts()
     
+    save_fedwalk_for_last = []
     for [path, combo] in fp_combox_mapping:
         modified_fp = path.replace(og_workspace, mod_workspace)
 
@@ -250,12 +251,15 @@ def obf_on_submit():
         elif "pcap" in combo.get():
             pass
         elif "fedwalk" in combo.get():
-            pass
+            save_fedwalk_for_last.append((path, modified_fp))
         else:
             print(f"{path} >>> exempt or blank, skipping obfuscation")
         
         append_mstr_dicts()
         set_repl_dicts()
+    
+    for (src, dst) in save_fedwalk_for_last:
+        fedwalk.mainloop(args, src, dst)
 
 
 options = {"-pi, --preserve-ips":"Program scrambles routable IP(v4&6) addresses by default, use this option to preserve original IP addresses",\
