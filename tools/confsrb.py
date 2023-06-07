@@ -4,8 +4,6 @@
 
 import re
 import random
-import sys
-import os
 
 # Global Variables
 contents = []
@@ -169,17 +167,10 @@ def show():
     print(contents)
 
 # Exports file that was loaded (pre or post obfuscation)
-def export(args):
+def export(modfile_name):
     new_filename = ""
-    modfilenames = []
-    for fn in og_filenames:
-        new_filename = fn.replace(".conf", "_mod.conf")
-        if('-d' in args):
-            a = re.search(args[2], fn).span()
-            modfilenames.append(fn[:a[0]] + mod_dir + fn[a[1]:])
-        else:
-            modfilenames.append(new_filename)
-    
+    modfilenames = [modfile_name]
+
     for index, w_file in enumerate(modfilenames):
         with open(w_file, 'w') as write:
             for line in contents[index]:
@@ -217,110 +208,6 @@ def showMap(op):
     else:
         print("\nUnknown option\n")
 
-def importMap(filename):
-    lines = []
-    with open(filename, 'r') as o:
-        lines = o.readlines()
-    
-    print(lines)
-
-    imp_ip = False
-    imp_mac = False
-    imp_str = False
-
-    OG = ""
-    for l in lines:
-        if '+---' in l:
-            if 'IP' in l:
-                imp_ip = True
-                imp_mac = False
-                imp_str = False
-            elif 'MAC' in l:
-                imp_ip = False
-                imp_mac = True
-                imp_str = False
-            elif 'STRING' in l:
-                imp_ip = False
-                imp_mac = False
-                imp_str = True
-            else:
-                print("Map file is improperly formatted, do not make changes to the map file unless you know what you are doing")
-                sys.exit(1)
-            continue
-
-        if not len(l):
-            continue
-
-        if imp_ip:
-            components = l.split(':')
-            if ('Original' in components[0]):
-                OG = components[1].strip()
-            else:
-                ip_repl[OG] = components[1].strip()
-                OG = ""
-        elif imp_mac:
-            components = l.split(':')
-            if ('Original' in components[0]):
-                OG = components[1].strip()
-            else:
-                #mac_repl[OG] = components[1]
-                OG = ""
-        elif imp_str:
-            components = l.split(':')
-            if ('Original' in components[0]):
-                OG = components[1].strip()
-            else:
-                str_repl[OG] = components[1].strip()
-                OG = ""
-        
-        else:
-            print("Something went wrong, mappings might not be fully imported\n")
-            print(f"Interpreted mappings based on import\nIP Mapping: {ip_repl}\nMAC Mapping:\nString Mapping: {str_repl}\n")
-
-def buildDirTree(dir):
-    mod_dir = f"{dir}_obfuscated"
-
-    mtd = mod_dir
-
-    dirTree = next(os.walk(dir))[0]
-    slashes = dirTree.count('/') + dirTree.count('\\')
-
-    dirTree = []
-
-    for dirpath, dirnames, fnames in os.walk(dir):
-        check = f"{dirpath}"
-        
-        dirTree.append(check)
-
-    # Create new directory to house the modified files
-    os.makedirs(mod_dir, exist_ok=True)
-
-    moddirTree = dirTree.copy()
-    for i, path in enumerate(moddirTree):
-        a = re.search(dir, path)
-        moddirTree[i] = path[:a.span()[0]] + mod_dir + path[a.span()[1]:]
-
-        os.makedirs(moddirTree[i], exist_ok=True)
-    
-    return (mtd, dirTree)
-
-def getFiles(dirTree):
-    slash = '/'
-
-    files = []
-    # Gotta love Windows
-    if sys.platform == 'win32':
-        slash = '\\'
-    
-    # list comprehension ftw! dir + slash (/ or \) + filename
-    for dir in dirTree:
-        files.extend([f'{dir}{slash}{i}' for i in next(os.walk(dir))[2]])
-        if f'{dir}{slash}confsrb.py' in files:
-            print(f"\nERROR: You cannot perform a confsrb on a directory containing itself\n\nexiting...\n")
-            sys.exit()
-    
-    return files
-
 # Obfuscation main fuction
 def obfuscate(conf):
 
@@ -338,8 +225,6 @@ def obfuscate(conf):
     SNMP_HOSTS = False
     IPSEC_P1 = False
     IPSEC_P2 = False
-
-    # Handle naming of snmp and vpn replacement names
 
     # Debugging
     x = ""
@@ -366,10 +251,11 @@ def obfuscate(conf):
                     g[2] = g[2][1:-1]
 
                 g[2] = content[:a[0]] + replace_ip4(content[a[0]:a[1]]) + content[a[1]:]
-                    
+                  
             elif (len(g) > 3):
                 for b, ip in enumerate(g[2:]):
-                    g[b + 2] = replace_ip4(ip)
+                    if is_ip4.search(ip):
+                        g[b + 2] = replace_ip4(ip)
 
             leading += " ".join(g)
             content = leading + "\n"
@@ -474,96 +360,21 @@ def obfuscate(conf):
 
     return conf
 
-options = {"-h": "Display this output",\
-           "-g": "Use this option if you are inputting a group of logs. Usage: py logscrub.py -g log1.log,log2.log3.log... <options>",\
-           "-d": "Same as -g, but specifying a whole directory. Usage: py logscrub.py -d [path] <options>",\
-           "-sPIP": "Scrub private IPs. Assumes /16 subnet",\
-           "-pi":"preserve all ip addresses",\
-           "-ps":"preserve snmp community names",\
-           "-pv":"preserve vpn phase1/2 names names",\
-           "-map=<mapfilename>":"Import IP/MAC/String mappings from other FFI program output"}
+def mainLoop(args: list, src_path: str, dst_path: str):
 
-def mainLoop(args: list):
+    contents.clear()
+    global opflags
+    opflags = args
 
-    if len(args) < 2:
-        print("Usage:\n\tpython confsrb.py <config file> [options] OR\
-                    \n\tpython confsrb.py -g conf1,conf2,... [options] OR\
-                    \n\tpython confsrb.py -d <dir> [options]\n")
-        sys.exit()
-
-    if args[1] == '-g':
-        if len(args) < 3:
-            print("Usage:\n\tpython confsrb.py -g conf1,conf2,... [options]\n")
-            sys.exit()
-        try:
-            og_filenames = [fn for fn in args[2].split(',')]
-            for file in og_filenames:
-                with open(file, 'r') as f:
-                    contents.append(f.readlines())        
-        except IndexError:
-            print("Usage:\n\tpython confsrb.py -g conf1,conf2,... [options]\n")
-            sys.exit()
-        except FileNotFoundError:
-            print("Couldn't find one of the files provided")
-            sys.exit()
-        if len(args) > 3:
-            for x in args[3:]:
-                if "-map" in x:
-                    mapfn = x.split('=')[1]
-                    try:
-                        importMap(mapfn)
-                    except:
-                        print(f"Could not read map file: {mapfn}")
-                else:
-                    opflags.append(x)
-
-
-    elif args[1] == '-d':
-        if len(args) < 3:
-            print("\n\tpython confsrb.py -d <dir> [options]\n")
-            sys.exit()
-        if os.path.isfile(args[2]):
-            print(f"Path provided: {args[2]} is a file, not a directory (or does not exist)")
-            sys.exit()
-        
-        print(args[2])
-        dt = buildDirTree(args[2])
-        mod_dir = dt[0]
-        dirtree = dt[1]
-        og_filenames = getFiles(dirtree)
-
-        curfile = ""
-        try:
-            for file in og_filenames:
-                curfile = file
-                with open(file, 'r') as f:
-                    contents.append(f.readlines())
-        except:
-            print(f"Could not find file {curfile}")
-            sys.exit()
-
-        if len(args) > 3:
-            for x in args[3:]:
-                if "-map" in x:
-                    mapfn = x.split('=')[1]
-                    try:
-                        importMap(mapfn)
-                    except:
-                        print(f"Could not read map file: {mapfn}")
-                else:
-                    opflags.append(x)
-
-    else:
-        try:
-            with open(args[1], 'r') as f:
-                contents.append(f.readlines())
-        except:
-            print(f"Could not find file {args[1]}")
-            sys.exit()
+    try:
+        with open(src_path, 'r') as f:
+            contents.append(f.readlines())
+    except:
+        print(f"[CONF] Could not find file {src_path}")
 
     obfuscated_contents = []
 
     for conf_file in contents:
         obfuscated_contents.append(obfuscate(conf_file))
 
-    export(args)
+    export(dst_path)

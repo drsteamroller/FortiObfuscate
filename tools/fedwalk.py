@@ -386,7 +386,7 @@ options = {"-h": "Display this output",\
 		   "-st=<stringfile>:":"Import a file containing strings you wish to replace (csv or newline separated values)",\
 		   "-map=<mapfilename>":"Import IP/MAC/String mappings from other FFI program output"}
 
-def mainLoop(args: list):
+def mainLoop(args: list, src_path: str, dst_path: str):
 
 	if ((len(args) < 3) or '-' in args[2]):
 		print("Usage: \n\tpy fedwalk.py <directory> <depth> [options]")

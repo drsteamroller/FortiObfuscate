@@ -521,7 +521,7 @@ options = {"-pi, --preserve-ips":"Program scrambles routable IP(v4&6) addresses 
 			"-ns":"Non-standard ports used. By default pcapsrb.py assumes standard port usage, use this option if the pcap to be scrubbed uses non-standard ports. For more info on usage, run \'python pcapsrb.py -ns -h\'",\
 			"-map=<MAPFILE>":"Take a map file output from any FFI program and input it into this program to utilize the same replacements"}
 
-def mainLoop(args: list):
+def mainLoop(args: list, src_path: str, dst_path: str):
 
 	# Check if file is included
 	if (len(args) < 2):
