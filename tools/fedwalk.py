@@ -53,6 +53,12 @@ def isValidIP6(addr):
 	if type(addr) == bytes:
 		addr = str(addr)[2:-1]
 	
+	if len(addr) > 2:
+		return False
+
+	if " " in addr:
+		return False
+	
 	maxcol = 7
 	mincol = 2
 	countcol = 0
