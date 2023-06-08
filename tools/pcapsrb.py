@@ -521,29 +521,10 @@ options = {"-pi, --preserve-ips":"Program scrambles routable IP(v4&6) addresses 
 			"-ns":"Non-standard ports used. By default pcapsrb.py assumes standard port usage, use this option if the pcap to be scrubbed uses non-standard ports. For more info on usage, run \'python pcapsrb.py -ns -h\'",\
 			"-map=<MAPFILE>":"Take a map file output from any FFI program and input it into this program to utilize the same replacements"}
 
-def mainLoop(args: list, src_path: str, dst_path: str):
+def mainloop(args: list, src_path: str, dst_path: str):
 
-	# Check if file is included
-	if (len(args) < 2):
-		print("\nUsage:\n\tpy pcapsrb.py [file].pcap [options]\n\t--help -> for options\n")
-		sys.exit()
-
-	if ('-h' in args[1]):
-		for k,v in options.items():
-			print("\t{}: {}".format(k, v))
-		sys.exit()
-
-	elif (len(args) > 2 and '-ns' in args[1] and '-h' in args[2]):
-		print("Refer to the example file in the GitHub called \'ports.txt\'. Use this example file or do an -ns=<file> to feed in a custom file.\
-		\nIf you just do a \'-ns\' with no equal, it will assume you are referring to ports.txt for non-standard ports.\n\
-			The protocols in ports.txt are the only protocols that are scrubbed. You can add more, however, they will not be scrubbed\n\
-			If you want to leave certain protocols un-scrubbed, you can set their port to -1, and it will be ignored\n")
-		sys.exit()
-
-	else:
-		if('.pcap' not in args[1]):
-			print("Unsupported file format: \"{}\"\nRun python pcapsrb.py -h for usage help\n".format(args[1]))
-			sys.exit()
+	global opflags
+	opflags = args
 
 	# Grab the args and append them into a flags list. Do some special operations for -O and -ns flags
 	ports = ""
@@ -576,29 +557,17 @@ def mainLoop(args: list, src_path: str, dst_path: str):
 						protocol_ports[prot_port[0].lower()] = [prot_port[1]]
 				except:
 					print("Non-standard ports file not formatted correctly\nCorrect format:\n\n<Protocol1>:<port>\n<Protocol2>:<port>\n...\nSee ports.txt for more examples")
-		if ("map=" in arg):
-			try:
-				fn = arg.split('=')[1]
-				importMap(fn)
-			except FileNotFoundError as e:
-				print(f"Could not find file/path specified: '{fn}'")
-			except IndexError:
-				print("-map option needs to be formatted like so:\n\t-map=<filename>")
-			except:
-				print("Something went wrong when importing mapfile (-map=<file> option)")
-		opflags.append(arg)
 
 	# Open the existing PCAP in a dpkt Reader
 	try:
-		f = open(args[1], 'rb')
+		f = open(src_path, 'rb')
 	except:
-		print("File not found or something else went wrong, try full path or place pcapsrb.py & pcap in same path")
+		print("[PCAP] File not found or something else went wrong, try full path or place pcapsrb.py & pcap in same path")
 		sys.exit()
 	pcap = dpkt.pcap.Reader(f)
 
 	# Open a dpkt Writer pointing to an output file
-	modfilename = "{}_mod.pcap".format(args[1].split('.')[0])
-	f_mod = open(modfilename, 'wb')
+	f_mod = open(dst_path, 'wb')
 	pcap_mod = dpkt.pcap.Writer(f_mod)
 
 	#############################################################################################
@@ -720,11 +689,5 @@ def mainLoop(args: list, src_path: str, dst_path: str):
 
 	print()
 
-	try:
-		if (len(mapfilename) == 0):
-			mapfilename = args[1].split('.')[0] + "_mpdaddr.txt"
-
-		repl_dicts_to_logfile(mapfilename)
-	finally:
-		f.close()
-		f_mod.close()
+	f.close()
+	f_mod.close()
