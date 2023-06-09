@@ -574,7 +574,7 @@ def mainloop(args: list, src_path: str, dst_path: str):
 	#                                  Enter PCAP Scrubbing                                     #
 	#############################################################################################
 
-	print("Entering pcap", end='')
+	# print("Entering pcap", end='')
 
 	for timestamp, buf in pcap:
 		try:
@@ -681,13 +681,11 @@ def mainloop(args: list, src_path: str, dst_path: str):
 			pcap_mod.writepkt(eth, ts=timestamp)
 
 			# each '.' means one packet read&written
-			print(".", end='')
+			# print(".", end='')
 
 		except Exception as e:
 			print(f"Exception thrown at timestamp {datetime.datetime.utcfromtimestamp(timestamp)}: {e}")
 			pcap_mod.writepkt(eth, ts=timestamp)
-
-	print()
 
 	f.close()
 	f_mod.close()

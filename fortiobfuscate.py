@@ -32,8 +32,6 @@ def importMap(filename):
     lines = []
     with open(filename, 'r') as o:
         lines = o.readlines()
-    
-    print(lines)
 
     imp_ip = False
     imp_mac = False
@@ -419,33 +417,43 @@ def append_mstr_dicts(ip_repl_mstr=ip_repl_mstr, str_repl_mstr=str_repl_mstr, ma
 
     fromPCAPFormat()
 
-def obf_on_submit():
+def obf_on_submit(progress: ttk.Progressbar):
 
+    # In case a map is imported
     set_repl_dicts()
     
     save_fedwalk_for_last = []
-    for [path, combo] in fp_combox_mapping:
-        modified_fp = path.replace(og_workspace, mod_workspace)
+    amount_of_files = len(fp_combox_mapping)
 
-        print(f"File_Path = {path}\nModified_FP = {modified_fp}\nComboBox Option = {combo.get()}")
+    for num, [path, combo] in enumerate(fp_combox_mapping):
+        modified_fp = path.replace(og_workspace, mod_workspace)
 
         if "config" in combo.get():
             conf.mainLoop(opflags, path, modified_fp)
+            print(f"[CONFIG] - {path} obfuscated and written to {modified_fp}")
         elif "syslog" in combo.get():
             log.mainloop(opflags, path, modified_fp)
+            print(f"[SYSLOG] - {path} obfuscated and written to {modified_fp}")
         elif "pcap" in combo.get():
             pcap.mainloop(opflags, path, modified_fp)
+            print(f"[PCAP] - {path} obfuscated and written to {modified_fp}")
         elif "fedwalk" in combo.get():
             save_fedwalk_for_last.append((path, modified_fp))
         else:
-            print(f"{path} >>> exempt or blank, skipping obfuscation")
-        
+            print(f"[EXEMPT] - {path} exempted and copied to {modified_fp}")
+
+        progress['value'] = ((num+1)/amount_of_files)*100
+
         append_mstr_dicts()
         set_repl_dicts()
-        print(f"IP_mstr: {ip_repl_mstr}\nSTR_mstr: {str_repl_mstr}\nMAC_mstr: {mac_repl_mstr}")
-    
-    for (src, dst) in save_fedwalk_for_last:
-        fedwalk.mainloop(args, src, dst)
+
+    if len(save_fedwalk_for_last) > 0:
+        amount_of_files = len(save_fedwalk_for_last)
+
+        for num, (src, dst) in enumerate(save_fedwalk_for_last):
+            fedwalk.mainloop(opflags, src, dst)
+            print(f"[FEDWALK] - {path} obfuscated and written to {modified_fp}")
+
 
 
 options = {"-pi, --preserve-ips":"Program scrambles routable IP(v4&6) addresses by default, use this option to preserve original IP addresses",\
@@ -480,21 +488,27 @@ else:
 
 # First, either:
 # Set up GUI
+l, w = 900, 800
+
 main_window = tk.Tk()
-main_window.geometry("800x750")
+main_window['bg'] = 'dark grey'
+main_window.geometry(f"{l}x{w}")
 main_window.title("FortiObfuscate")
 
 label = tk.Label(main_window, text="FortiObfuscate - scrub syslog/config/pcap files and much more", font=("San Francisco", 20))
 label.grid(column=0, row=0)
 
-m_frame = tk.Frame(main_window, padx=75, pady=150, bg='black', bd=1, relief="raised")
+m_frame = tk.Frame(main_window, height=500, width=700, padx=10, pady=25, bg='black', bd=1, relief="raised")
 m_frame.grid(column=0, row=1)
 
+
+'''
 treeframe = tk.Frame(m_frame, padx=5, pady=5, bg="dark grey", bd=1, relief="sunken")
 treeframe.grid(column=0, row=0)
 
 comboframe = tk.Frame(m_frame, padx=5, pady=5, bg="dark grey", bd=1, relief="sunken")
 comboframe.grid(column=1, row=0)
+'''
 
 switchframe = tk.Frame(main_window, padx=5, pady=5, bg="dark grey", bd=1, relief="sunken")
 switchframe.grid(column=0, row=2)
@@ -544,11 +558,14 @@ scrubprivateIPs_button.grid(column=1, row=1)
 help = ttk.Button(main_window, command=help, text="Help")
 help.grid(column=0, row=3)
 
-submit = ttk.Button(main_window, command=obf_on_submit, text="Submit")
+progress = ttk.Progressbar(main_window, orient='horizontal', length=500, mode='determinate')
+
+submit = ttk.Button(main_window, command=lambda : obf_on_submit(progress), text="Submit")
 submit.grid(column=0, row=4)
 
-# variable list of comboboxes based on the output of os.walk
-print(og_workspace)
+blankFrame = tk.Frame(main_window, padx=10, pady=20)
+blankFrame.grid(column=0, row=5)
+progress.grid(column=0, row=6)
 
 # Build target directory for modified files in the backend
 mod_workspace, dirtree_of_workspace = buildDirTree(og_workspace)
@@ -556,21 +573,29 @@ files = getFiles(dirtree_of_workspace)
 
 combox_options = ['config', 'syslog', 'pcap', 'fedwalk', 'exempt']
 
-for path in files:
+for row, path in enumerate(files):
     inner = []
 
+    '''
     next_label = ttk.Label(treeframe, justify="center", text=path)
     next_comb = ttk.Combobox(comboframe, justify='center', values=combox_options)
     
     next_label.pack(anchor='w')
     next_comb.pack(anchor='e')
+    '''
+    fw = (w * 2) // 3
+    nextFrame = tk.Frame(m_frame, height=25, width=700, padx=5, pady=3, bg="dark grey", bd=1, relief='raised')
+    nextFrame.grid_propagate(0)
+    nextFrame.grid(column=0, row=row)
+    next_label = ttk.Label(nextFrame, justify="center", text=path)
+    next_comb = ttk.Combobox(nextFrame, justify='center', values=combox_options)
+
+    spacing = (150-len(path))
+    next_label.grid(column=0, row=0, ipadx=spacing)
+    next_comb.grid(column=1, row=0)
 
     inner.extend([path, next_comb])
 
     fp_combox_mapping.append(inner)
 
 main_window.mainloop()
-
-# Every program that is not specified will be scrubbed with fedwalk
-
-# Throw all output into the target directory
