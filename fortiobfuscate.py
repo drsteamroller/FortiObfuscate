@@ -488,7 +488,7 @@ else:
 
 # First, either:
 # Set up GUI
-l, w = 900, 800
+l, w = 775, 700
 
 main_window = tk.Tk()
 main_window['bg'] = 'dark grey'
@@ -583,15 +583,14 @@ for row, path in enumerate(files):
     next_label.pack(anchor='w')
     next_comb.pack(anchor='e')
     '''
-    fw = (w * 2) // 3
-    nextFrame = tk.Frame(m_frame, height=25, width=700, padx=5, pady=3, bg="dark grey", bd=1, relief='raised')
+
+    nextFrame = tk.Frame(m_frame, height=25, width=750, padx=5, pady=3, bg="dark grey", bd=1, relief='raised')
     nextFrame.grid_propagate(0)
     nextFrame.grid(column=0, row=row)
-    next_label = ttk.Label(nextFrame, justify="center", text=path)
-    next_comb = ttk.Combobox(nextFrame, justify='center', values=combox_options)
+    next_label = ttk.Label(nextFrame, justify="left", width=100, text=path)
+    next_comb = ttk.Combobox(nextFrame, justify='right', width=20, values=combox_options)
 
-    spacing = (150-len(path))
-    next_label.grid(column=0, row=0, ipadx=spacing)
+    next_label.grid(column=0, row=0)
     next_comb.grid(column=1, row=0)
 
     inner.extend([path, next_comb])
