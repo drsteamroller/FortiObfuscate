@@ -31,6 +31,7 @@ protocol_ports = {'dhcp': [67,68], \
 		  'tftp': [69], 'http': [80], 'dhcpv6': [546,547], 'radius': [1812,1813]}
 opflags = []
 mapfilename = ""
+debug_mes = ""
 
 #############################################################################################
 #                                    Helper Functions                                       #
@@ -521,20 +522,15 @@ options = {"-pi, --preserve-ips":"Program scrambles routable IP(v4&6) addresses 
 			"-ns":"Non-standard ports used. By default pcapsrb.py assumes standard port usage, use this option if the pcap to be scrubbed uses non-standard ports. For more info on usage, run \'python pcapsrb.py -ns -h\'",\
 			"-map=<MAPFILE>":"Take a map file output from any FFI program and input it into this program to utilize the same replacements"}
 
-def mainloop(args: list, src_path: str, dst_path: str):
+def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 
 	global opflags
+	global debug_mes
 	opflags = args
 
 	# Grab the args and append them into a flags list. Do some special operations for -O and -ns flags
 	ports = ""
 	for arg in args[2:]:
-		if ("-O=" in arg):
-			try:
-				mapfilename = arg.split("=")[1]
-			except:
-				print("-O option needs to be formatted like so:\n\t-O=<filename>")
-			continue
 		if ("-ns" in arg):
 			if ('=' in arg):
 				ports = arg.split("=")[1]
@@ -561,10 +557,20 @@ def mainloop(args: list, src_path: str, dst_path: str):
 	# Open the existing PCAP in a dpkt Reader
 	try:
 		f = open(src_path, 'rb')
+		debug_mes += f"[PCAP] Successfully opened file: {src_path}\n"
 	except:
-		print("[PCAP] File not found or something else went wrong, try full path or place pcapsrb.py & pcap in same path")
+		out = f"[PCAP] File not found or something else went wrong, try full path or place pcapsrb.py & pcap in same path. File provided: \n\t{src_path}\n"
+		print(out)
+		debug_mes += out
 		sys.exit()
-	pcap = dpkt.pcap.Reader(f)
+
+	try:
+		pcap = dpkt.pcap.Reader(f)
+		debug_mes += f"[PCAP] {src_path} Successfully interpreted by dpkt Reader\n"
+	except:
+		out = f"[PCAP] {src_path} does not appear to be a pcap file\n"
+		print(out)
+		debug_mes += out
 
 	# Open a dpkt Writer pointing to an output file
 	f_mod = open(dst_path, 'wb')
@@ -580,15 +586,21 @@ def mainloop(args: list, src_path: str, dst_path: str):
 		try:
 			# unpack into (mac src/dst, ethertype)
 			eth = dpkt.ethernet.Ethernet(buf)
-			
+			debug_mes += f"[PCAP] Unpacked Ethernet headers\n"
+
 			# Replace MAC addresses if not flagged
 			if("-pm" not in opflags and "--preserve-macs" not in opflags):
 				eth.src = replace_mac(eth.src)
 				eth.dst = replace_mac(eth.dst)
+				debug_mes += f"[PCAP] Replaced ethernet src + dst:\n\tSRC: {eth.src.hex()} -> {replace_mac(eth.src)}\n"
+				debug_mes += f"\tDST: {eth.dst.hex()} -> {replace_mac(eth.dst)}\n"
 
 			# Replace IP addresses if not flagged
 			if (isinstance(eth.data, dpkt.ip.IP) or isinstance(eth.data, dpkt.ip6.IP6)):
 				ip = eth.data
+
+				debug_mes += f"[PCAP] Unpacked IP headers\n"
+
 				if("-pi" not in opflags and "--preserve-ips" not in opflags):
 					if (len(ip.src.hex()) == 8):
 						ip.src = replace_ip(ip.src)
@@ -598,6 +610,7 @@ def mainloop(args: list, src_path: str, dst_path: str):
 						ip.dst = replace_ip(ip.dst)
 					else:
 						ip.dst = replace_ip6(ip.dst)
+					debug_mes += f"[PCAP] Replaced IP src + dst\n"
 
 				# Check for ICMP/v6. Currently testing to see what needs to be masked
 				if (isinstance(ip.data, dpkt.icmp.ICMP)):
@@ -675,7 +688,7 @@ def mainloop(args: list, src_path: str, dst_path: str):
 							udp = ip.data
 							udp.data = scrub_upper_prots(udp.data, udp.sport, udp.dport)
 				except:
-					print("Packet at timestamp: {} is of non IP Packet type, therefore unsupported (as of right now)".format(datetime.datetime.utcfromtimestamp(timestamp)))
+					debug_mes += f"[PCAP] Packet at timestamp: {datetime.datetime.utcfromtimestamp(timestamp)} is of non IP Packet type, therefore unsupported (as of right now)"
 
 			# Write the modified (or unmodified, if not valid) packet
 			pcap_mod.writepkt(eth, ts=timestamp)
@@ -689,3 +702,7 @@ def mainloop(args: list, src_path: str, dst_path: str):
 
 	f.close()
 	f_mod.close()
+
+	if debug_log:
+		debug_log.write(debug_mes + "\n\n")
+		debug_mes = ""

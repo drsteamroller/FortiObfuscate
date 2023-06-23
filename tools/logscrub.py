@@ -20,6 +20,7 @@ ip_repl = dict()
 syslogregex = re.compile(r'(.+?)=("[^"]*"|\S*)\s*')
 ip4 = re.compile(r'(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[.](25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[.](25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[.](25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)')
 ip6 = re.compile(r"(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))")
+debug_mes = ""
 
 # RFC1918 Detector
 def isRFC1918(ip):
@@ -133,11 +134,12 @@ def replace_str(s):
 
 	return repl
 
-def mainloop(args: list, src_path: str, dst_path: str):
+def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 
 	global logcontents
 	global opflags
 	opflags = args
+	global debug_mes
 
 	# Load contents
 
@@ -155,6 +157,8 @@ def mainloop(args: list, src_path: str, dst_path: str):
 
 		logcontents.append(logfile_per_list.copy())
 		logfile_per_list.clear()
+	
+	debug_mes += f"[SYSLOG] Sylog file {src_path} indexed and loaded, entering obfuscation loop\n"
 
 	# Walk through contents & scrub
 	for l_off, logfile in enumerate(logcontents):
@@ -162,36 +166,54 @@ def mainloop(args: list, src_path: str, dst_path: str):
 			try:
 				# usernames
 				if ("user" in logentry.keys()):
+					u = ""
 					if (logentry['user'] not in str_repl.keys()):
 						u = logentry['user']
 						str_repl[u] = logentry["user"] = f'"{replace_str(u)}"'
 					else:
 						logentry["user"] = str_repl[logentry['user']]
+					debug_mes += f"[SYSLOG] \\user\\ field identified and replaced:\n\t{u} -> {str_repl[u]}\n"
 
 				# ip addresses (also under"ui" & msg)
 				if ("srcip" in logentry.keys()):
+					replacement = ""
 					if (':' in logentry["srcip"]):
 						if ("\"" in logentry['srcip']):
-							logentry["srcip"] = f'"{replace_ip6(logentry["srcip"][1:-1])}"'
+							replacement = replace_ip6(logentry["srcip"][1:-1])
+							logentry["srcip"] = f'"{replacement}"'
 						else:
-							logentry["srcip"] = replace_ip6(logentry["srcip"])
+							replacement = replace_ip6(logentry["srcip"])
+							logentry["srcip"] = replacement
+						debug_mes += f"[SYSLOG] \\srcip (ipv6)\\ field identified and replaced:\n\t{logentry['srcip']} -> {replacement}\n"
 					else:
 						if ("\"" in logentry['srcip']):
-							logentry["srcip"] = f'"{replace_ip4(logentry["srcip"][1:-1])}"'
+							replacement = replace_ip4(logentry["srcip"][1:-1])
+							logentry["srcip"] = f'"{replacement}"'
 						else:
-							logentry["srcip"] = replace_ip4(logentry["srcip"])
+							replacement = replace_ip4(logentry['srcip'])
+							logentry["srcip"] = replacement
+						debug_mes += f"[SYSLOG] \\srcip (ipv4)\\ field identified and replaced:\n\t{logentry['srcip']} -> {replacement}\n"
 
 				if ("dstip" in logentry.keys()):
+					replacement = ""
 					if (':' in logentry["dstip"]):
 						if ("\"" in logentry['dstip']):
-							logentry["dstip"] = f'"{replace_ip6(logentry["dstip"][1:-1])}"'
+							replacement = replace_ip6(logentry["dstip"][1:-1])
+							logentry["dstip"] = f'"{replacement}"'
 						else:
-							logentry["dstip"] = replace_ip6(logentry["dstip"])
+							replacement = replace_ip6(logentry["dstip"])
+							logentry["dstip"] = replacement
+						debug_mes += f"[SYSLOG] \\dstip (ipv6)\\ field identified and replaced:\n\t{logentry['dstip']} -> {replacement}\n"
+
 					else:
 						if ("\"" in logentry['dstip']):
-							logentry["dstip"] = f'"{replace_ip4(logentry["dstip"][1:-1])}"'
+							replacement = replace_ip4(logentry["dstip"][1:-1])
+							logentry["dstip"] = f'"{replacement}"'
 						else:
-							logentry["dstip"] = replace_ip4(logentry["dstip"])
+							replacement = replace_ip4(logentry["dstip"])
+							logentry["dstip"] = replacement
+						debug_mes += f"[SYSLOG] \\dstip (ipv4)\\ field identified and replaced:\n\t{logentry['dstip']} -> {replacement}\n"
+
 
 				if ("ui" in logentry.keys()):
 					ip_search = ip4.search(logentry['ui'])
@@ -199,8 +221,11 @@ def mainloop(args: list, src_path: str, dst_path: str):
 						ip_search = ip6.search(logentry['ui'])
 					if (ip_search is not None):
 						logentry['ui'] = logentry['ui'][:ip_search.span()[0]] + replace_ip4(ip_search.group()) + logentry['ui'][ip_search.span()[1]:]
+						debug_mes += f"[SYSLOG] \\ui (ipv4)\\ field identified and replaced:\n\t{logentry[ip_search.span()[0]:ip_search.span()[1]]} -> {replace_ip4(ip_search.group())}\n"
+				
 				# msg
 				if ("msg" in logentry.keys()):
+					replacement = ""
 					ip_search = ip4.search(logentry['msg'])
 					if (ip_search is None):
 						ip_search = ip6.search(logentry['msg'])
@@ -211,28 +236,34 @@ def mainloop(args: list, src_path: str, dst_path: str):
 						m = re.search(og_name, logentry['msg'])
 						if (m is not None):
 							logentry['msg'] = logentry['msg'][:m.span()[0]] + rep_name[1:-1] + logentry['msg'][m.span()[1]:]
+							debug_mes += f"[SYSLOG] \\critical string in msg\\ identified and replaced:\n\t{og_name} -> {rep_name}\n\tNew entry: {logentry['msg']}\n"
 				
 				# device names
 				if ('-pd' not in opflags and "devname" in logentry.keys()):
+					replacement = ""
+					original = ""
 					if (logentry['devname'] not in str_repl.keys()):
-						d = logentry['devname']
-						str_repl[d] = logentry['devname'] = f'"US_FED_DEV_{replace_str(d)}"'
+						original = d = logentry['devname']
+						replacement = str_repl[d] = logentry['devname'] = f'"US_FED_DEV_{replace_str(d)}"'
 					else:
 						logentry['devname'] = str_repl[logentry['devname']]
+					debug_mes += f"[SYSLOG] \\devname\\ field identified and replaced:\n\t{original} -> {replacement}\n"
 
 				# vdom names
 				if ('-pv' not in opflags and "vd" in logentry.keys()):
+					replacement = ""
+					original = ""
 					if (logentry['vd'] != "root" ):
 						if (logentry['vd'] not in str_repl.keys()):
-							v = logentry['vd']
-							str_repl[v] = logentry['vd'] = f'"US_FED_VDOM_{replace_str(v)}"'
+							original = v = logentry['vd']
+							replacement = str_repl[v] = logentry['vd'] = f'"US_FED_VDOM_{replace_str(v)}"'
 						else:
 							logentry['vd'] = str_repl[logentry['vd']]
+					debug_mes += f"[SYSLOG] \\vd\\ field identified and replaced:\n\t{original} -> {replacement}\n"
 				# CSF names
 			
 			except (KeyError, IndexError) as e:
-				print("Incomplete log")
-				print(f'{e}\n{logfile}\n{logentry}')
+				debug_mes += f"[SYSLOG] \\ERROR\\ Incomplete log file\n\nLog File:\n\t{logfile}\n\nLog Entry:\n\t{logentry}\n\n"
 
 			logfile[entry_off] = logentry.copy()
 		logcontents[l_off] = logfile.copy()
@@ -245,3 +276,7 @@ def mainloop(args: list, src_path: str, dst_path: str):
 				for b, a in d.items():
 					modfile.write(f"{b}={a} ")
 				modfile.write("\n")
+	
+	if debug_log:
+		debug_log.write(debug_mes + "\n\n")
+		debug_mes = ""

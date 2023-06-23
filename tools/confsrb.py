@@ -248,9 +248,9 @@ def obfuscate(conf):
                 name_r = f"US_Fed_Cx_{replace_str(l[2])}"
                 l[2] = f"{name_r}\n"
             except IndexError:
-                debug_mes += f"[CONF] \\ERR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
             else:
                 debug_mes += f"[CONF] \\set hostname | alias | description\\ statement enountered and replaced at line #{i}\n\t{name_o}  ->  {name_r}\n"
                 content = leading + "{} {} {}".format(l[0], l[1], l[2])            
@@ -277,9 +277,9 @@ def obfuscate(conf):
                             ip_r = g[b + 2] = replace_ip4(ip)
                 leading += " ".join(g)
             except IndexError:
-                debug_mes += f"[CONF] \\ERR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
             else:
                 debug_mes += f"[CONF] \\IPv4 address REGEX encountered\\ statement enountered and replaced at line #{i}\n\t{ip_o}  ->  {ip_r}\n"
                 content = leading + "\n"
@@ -302,9 +302,9 @@ def obfuscate(conf):
                         g[b + 2] = replace_ip6(ip)
                 leading += " ".join(g)
             except IndexError:
-                debug_mes += f"[CONF] \\ERR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
             else:
                 debug_mes += f"[CONF] \\IPv6 address REGEX encountered\\ statement enountered and replaced at line #{i}\n\t{ip_o}  ->  {ip_r}\n"
                 content = leading + "\n"
@@ -325,9 +325,9 @@ def obfuscate(conf):
                     
                     leading += " ".join(s)
                 except IndexError:
-                    debug_mes += f"[CONF] \\ERR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                    debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
                 except Exception as e:
-                    debug_mes += f"[CONF] \\ERR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                    debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
                 else:
                     debug_mes += f"[CONF] \\snmp | snmp_hosts > 'edit'\\ statement enountered and replaced at line #{i}\n\t{s[2]}  ->  {replace_str(name)}\n"
                     content = leading + "\n"
@@ -346,9 +346,9 @@ def obfuscate(conf):
 
                     leading += " ".join(s)
                 except IndexError:
-                    debug_mes += f"[CONF] \\ERR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                    debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
                 except Exception as e:
-                    debug_mes += f"[CONF] \\ERR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                    debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
                 else:
                     debug_mes += f"[CONF] \\SNMPv3 config hosts > 'edit'\\ statement enountered and replaced at line #{i}\n\t{s[2]}  ->  {replace_str(name)}\n"
                     content = leading + "\n"
@@ -361,9 +361,9 @@ def obfuscate(conf):
                     name = s[2]
                     leading += f'{s[0]} {s[1]} FED_SNMP_{name}\n'
                 except IndexError:
-                    debug_mes += f"[CONF] \\ERR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                    debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
                 except Exception as e:
-                    debug_mes += f"[CONF] \\ERR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                    debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
                 else:
                     debug_mes += f"[CONF] \\SNMP edit name\\ statement enountered and replaced at line #{i}\n\t{s[2]}  ->  {replace_str(name)}\n"
                     content = leading
@@ -392,9 +392,9 @@ def obfuscate(conf):
                     
                     leading += f'{v[0]} {v[1]} {repl}\n'
                 except IndexError:
-                    debug_mes += f"[CONF] \\ERR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                    debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
                 except Exception as e:
-                    debug_mes += f"[CONF] \\ERR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                    debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
                 else:
                     debug_mes += f"[CONF] \\IPSEC P1 set remotegw-ddns\\ statement enountered and replaced at line #{i}\n\t{v[2]}  ->  {repl}\n"
                     content = leading
@@ -408,9 +408,9 @@ def obfuscate(conf):
 
                     leading += f"{v[0]} {repl}\n"
                 except IndexError:
-                    debug_mes += f"[CONF] \\ERR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                    debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
                 except Exception as e:
-                    debug_mes += f"[CONF] \\ERR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                    debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
                 else:
                     debug_mes += f"[CONF] \\IPSEC P1 edit\\ statement enountered and replaced at line #{i}\n\t{v[2]}  ->  {repl}\n"
                     content = leading
@@ -424,9 +424,9 @@ def obfuscate(conf):
 
                     leading += f"{v[0]} {repl}\n"
                 except IndexError:
-                    debug_mes += f"[CONF] \\ERR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                    debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
                 except Exception as e:
-                    debug_mes += f"[CONF] \\ERR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                    debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
                 else:
                     debug_mes += f"[CONF] \\IPSEC P2 edit\\ statement enountered and replaced at line #{i}\n\t{v[2]}  ->  {repl}\n"
                     content = leading
@@ -440,9 +440,9 @@ def obfuscate(conf):
                     
                     leading += f"{v[0]} {v[1]} {repl}\n"
                 except IndexError:
-                    debug_mes += f"[CONF] \\ERR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                    debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
                 except Exception as e:
-                    debug_mes += f"[CONF] \\ERR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                    debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
                 else:
                     debug_mes += f"[CONF] \\IPSEC P2 set phase1name\\ statement enountered and replaced at line #{i}\n\t{v[2]}  ->  {repl}\n"
                     content = leading
@@ -480,5 +480,5 @@ def mainLoop(args: list, src_path: str, dst_path: str, debug_log : __file__):
     export(dst_path)
 
     if debug_log:
-        debug_log.write(debug_mes + "\n")
+        debug_log.write(debug_mes + "\n\n")
         debug_mes = ""

@@ -433,7 +433,7 @@ def obf_on_submit(progress: ttk.Progressbar):
     
     debug_log = None
     global debug_mode
-    
+
     if debug_mode:
         debug_log = open("fortiobfuscate_debug.log", 'w')
 
@@ -447,7 +447,7 @@ def obf_on_submit(progress: ttk.Progressbar):
             conf.mainLoop(opflags, path, modified_fp, debug_log)
             print(f"[CONFIG] - {path} obfuscated and written to {modified_fp}")
         elif "syslog" in combo.get():
-            log.mainloop(opflags, path, modified_fp)
+            log.mainloop(opflags, path, modified_fp, debug_log)
             print(f"[SYSLOG] - {path} obfuscated and written to {modified_fp}")
         elif "pcap" in combo.get():
             pcap.mainloop(opflags, path, modified_fp)
