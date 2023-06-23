@@ -1,0 +1,370 @@
+[CONF] Entering obfuscation of sample\FortiGate-71F_7-0_4682_202210211149_obfuscated.conf
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #5
+	US  ->  US_Fed_Cx_yu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #8
+	US  ->  US_Fed_Cx_yu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #38
+	US  ->  US_Fed_Cx_yu
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #52
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #60
+	255.255.255.0  ->  255.255.255.0
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #63
+	"NUC  ->  US_Fed_Cx_vCCj
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #118
+	US  ->  US_Fed_Cx_yu
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #123
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #133
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #553
+	34.249.42.32  ->  51.48.248.78
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #554
+	234.155.220.164  ->  61.153.32.110
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #568
+	  ->  
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7232
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7243
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7247
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7251
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7256
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7261
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7264
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7268
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7275
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7280
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7284
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7288
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7294
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7304
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7314
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7324
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7333
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7342
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7355
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7368
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7388
+	"Rate  ->  US_Fed_Cx_jnGLd
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7396
+	"Rate  ->  US_Fed_Cx_jnGLd
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7410
+	192.168.104.200  ->  192.168.142.236
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7411
+	1.53.47.156  ->  10.1.119.141
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7415
+	192.168.139.74  ->  192.168.62.236
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7416
+	192.168.57.221  ->  192.168.236.122
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7422
+	10.255.113.172  ->  10.255.89.103
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7423
+	1.53.47.156  ->  10.1.119.141
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7427
+	10.255.128.208  ->  10.255.49.145
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7428
+	10.255.54.229  ->  10.255.192.73
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7438
+	255.255.255.255  ->  255.255.255.255
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7483
+	10.212.50.22  ->  10.212.54.81
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7484
+	10.212.181.251  ->  10.212.106.241
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7489
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7495
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7507
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7511
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7516
+	231.167.250.171  ->  9.87.184.218
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7517
+	193.172.255.181  ->  175.57.224.87
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7520
+	123.115.20.145  ->  103.234.22.175
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7521
+	123.115.20.145  ->  103.234.22.175
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7524
+	130.198.30.85  ->  9.241.73.14
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7525
+	130.198.30.85  ->  9.241.73.14
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7528
+	64.170.19.105  ->  52.184.131.71
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7529
+	64.170.19.105  ->  52.184.131.71
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7532
+	117.50.138.177  ->  107.202.215.251
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7533
+	117.50.138.177  ->  107.202.215.251
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7536
+	72.255.25.11  ->  14.238.65.39
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7537
+	48.140.15.113  ->  29.145.236.190
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #9057
+	184.237.113.179  ->  128.67.192.5
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10545
+	US  ->  US_Fed_Cx_yu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10552
+	US  ->  US_Fed_Cx_yu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10559
+	US  ->  US_Fed_Cx_yu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10565
+	US  ->  US_Fed_Cx_yu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10572
+	US  ->  US_Fed_Cx_yu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10576
+	US  ->  US_Fed_Cx_yu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10581
+	US  ->  US_Fed_Cx_yu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10586
+	US  ->  US_Fed_Cx_yu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10591
+	US  ->  US_Fed_Cx_yu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10621
+	US  ->  US_Fed_Cx_yu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10627
+	US  ->  US_Fed_Cx_yu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10633
+	US  ->  US_Fed_Cx_yu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10638
+	US  ->  US_Fed_Cx_yu
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #10959
+	10.0.187.87  ->  10.0.98.167
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #10960
+	192.168.64.234  ->  192.168.211.164
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #11884
+	"default  ->  US_Fed_Cx_wXMJwiFB
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #11887
+	"storm  ->  US_Fed_Cx_sqXDuz
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #12008
+	10.0.189.159  ->  10.0.243.160
+[CONF] Finished obfuscation, wrote modifications to sample_obfuscated\FortiGate-71F_7-0_4682_202210211149_obfuscated.conf
+
+[CONF] Entering obfuscation of sample\FortiGate-71F_7-0_4682_202212021026.conf
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #5
+	"FortiGate-71F"  ->  US_Fed_Cx_wdokMoKVtEEZsoN
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10
+	"FortiGate-71F"  ->  US_Fed_Cx_wdokMoKVtEEZsoN
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #40
+	"HomeRouter"  ->  US_Fed_Cx_ESEeuXFiazjs
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #54
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #62
+	255.255.255.0  ->  255.255.255.0
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #65
+	"NUC  ->  US_Fed_Cx_vCCj
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #123
+	"SSL  ->  US_Fed_Cx_wiel
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #128
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #138
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #558
+	96.45.45.45  ->  78.7.61.56
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #559
+	96.45.46.46  ->  107.93.82.220
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7262
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7273
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7277
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7281
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7286
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7291
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7294
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7298
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7305
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7310
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7314
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7318
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7324
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7334
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7344
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7354
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7363
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7372
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7385
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7398
+	"Default  ->  US_Fed_Cx_usHaFzEo
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7418
+	"Rate  ->  US_Fed_Cx_jnGLd
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #7426
+	"Rate  ->  US_Fed_Cx_jnGLd
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7440
+	10.255.1.1  ->  10.255.110.83
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7441
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7445
+	10.255.1.2  ->  10.255.43.188
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7446
+	10.255.1.254  ->  10.255.183.157
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7454
+	192.168.1.98  ->  192.168.80.210
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7455
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7459
+	192.168.1.110  ->  192.168.108.207
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7460
+	192.168.1.110  ->  192.168.108.207
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7468
+	255.255.255.255  ->  255.255.255.255
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7513
+	10.212.134.200  ->  10.212.120.161
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7514
+	10.212.134.210  ->  10.212.164.66
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7519
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7525
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7535
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7541
+	255.255.255.255  ->  255.255.255.255
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7547
+	255.255.255.0  ->  255.255.255.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7553
+	255.255.240.0  ->  255.255.240.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7558
+	224.0.0.0  ->  224.0.0.0
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7559
+	239.255.255.255  ->  57.197.234.135
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7562
+	224.0.0.1  ->  237.27.7.245
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7563
+	224.0.0.1  ->  237.27.7.245
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7566
+	224.0.0.2  ->  85.10.184.27
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7567
+	224.0.0.2  ->  85.10.184.27
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7570
+	224.0.0.251  ->  123.240.143.109
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7571
+	224.0.0.251  ->  123.240.143.109
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7574
+	224.0.0.10  ->  241.50.251.94
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7575
+	224.0.0.10  ->  241.50.251.94
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7578
+	224.0.0.5  ->  190.224.24.133
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #7579
+	224.0.0.6  ->  196.116.103.154
+[CONF] \IPv6 address REGEX encountered\ statement enountered and replaced at line #7585
+	  ->  
+[CONF] \IPv6 address REGEX encountered\ statement enountered and replaced at line #7592
+	  ->  
+[CONF] \IPv6 address REGEX encountered\ statement enountered and replaced at line #7597
+	  ->  
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #9106
+	80.254.145.118  ->  24.134.201.33
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #9494
+	"NUC  ->  US_Fed_Cx_vCCj
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #9495
+	192.168.2.2  ->  192.168.165.124
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10647
+	".*\\.google\\..*"  ->  US_Fed_Cx_BKNBWGlPmSpdWrdicp
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10654
+	".*\\.yahoo\\..*"  ->  US_Fed_Cx_oOigenhgWElvjPnuk
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10661
+	".*\\.bing\\..*"  ->  US_Fed_Cx_qDWyjORbYfQUqPvx
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10667
+	"yandex\\..*"  ->  US_Fed_Cx_VPKDAbjopciag
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10674
+	".*youtube.*"  ->  US_Fed_Cx_rCRIYpjSQpmIV
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10678
+	".*\\.baidu\\.com"  ->  US_Fed_Cx_RyfFwBEGwHPdoFXtKR
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10683
+	".*\\.baidu\\.com"  ->  US_Fed_Cx_RyfFwBEGwHPdoFXtKR
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10688
+	"tieba\\.baidu\\.com"  ->  US_Fed_Cx_cWnBDeJYjVHuFuyroEaOq
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10693
+	".*vimeo.*"  ->  US_Fed_Cx_NltnMEqsMcK
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10723
+	"twitter\\.com"  ->  US_Fed_Cx_dRXGjdrCAHiqiAu
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10729
+	"translate\\.google\\..*"  ->  US_Fed_Cx_ygzpyiguXlsIPgMBaVtjoYsEX
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10735
+	".*\\.translate\\.goog"  ->  US_Fed_Cx_uRMGHqXoWjSAbLhFnyFxlRr
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #10740
+	"translate\\.google\\..*"  ->  US_Fed_Cx_ygzpyiguXlsIPgMBaVtjoYsEX
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11064
+	10.0.0.226  ->  10.0.243.206
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11065
+	192.168.2.2  ->  192.168.165.124
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11071
+	10.0.0.227  ->  10.0.194.72
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11072
+	192.168.1.110  ->  192.168.108.207
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11079
+	10.0.0.230  ->  10.0.53.170
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11080
+	192.168.2.3  ->  192.168.102.61
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11090
+	10.0.0.230  ->  10.0.53.170
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11091
+	192.168.2.4  ->  192.168.198.156
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11101
+	10.0.0.230  ->  10.0.53.170
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11102
+	192.168.2.5  ->  192.168.139.8
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11112
+	10.0.0.230  ->  10.0.53.170
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11113
+	192.168.2.10  ->  192.168.101.21
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11123
+	10.0.0.230  ->  10.0.53.170
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11124
+	192.168.2.11  ->  192.168.93.135
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11133
+	10.0.0.240  ->  10.0.202.40
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11134
+	192.168.1.99  ->  192.168.87.111
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11140
+	10.0.0.230  ->  10.0.53.170
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #11141
+	192.168.2.6  ->  192.168.242.122
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #12128
+	"default  ->  US_Fed_Cx_wXMJwiFB
+[CONF] \set hostname | alias | description\ statement enountered and replaced at line #12131
+	"storm  ->  US_Fed_Cx_sqXDuz
+[CONF] \IPv4 address REGEX encountered\ statement enountered and replaced at line #12252
+	10.0.0.1  ->  10.0.113.5
+[CONF] Finished obfuscation, wrote modifications to sample_obfuscated\FortiGate-71F_7-0_4682_202212021026.conf
+

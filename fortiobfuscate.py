@@ -24,6 +24,7 @@ str_repl_mstr = {}
 og_workspace = ""
 mod_workspace = ""
 opflags = []
+debug_mode = False
 
 # list of lists containing 2 items -> [file_path, combobox]
 fp_combox_mapping = []
@@ -325,6 +326,7 @@ def fromPCAPFormat(ip_repl_mstr=ip_repl_mstr, p_ip_repl=pcap.ip_repl, mac_repl_m
         
         if og_str not in str_repl_mstr.keys():
             str_repl_mstr[og_str] = rep_str
+
 # Button Functions
 # GUI-based help output explaining what each combobox option is and what it does, and debug based help
 def help():
@@ -340,7 +342,8 @@ Option Buttons:\n\
         'Scrub PCAP Payloads' = Scrubs the upper layer protocol payloads (some, not all)\n\
         'Scrub Private IPs' = Replaces RFC-1918 IP addresses with a randomize /16 address\n\n\
 The Submit button will perform the associated obfuscation operations on the files listed based on the selection and\n\
-with respect to the arguments chosen"
+with respect to the arguments chosen\n\n\
+To turn on Debug (detailed logs) mode: press <F12> when on the main screen of the program"
 
     helpPopupWin = tk.Tk()
     helpPopupWin.geometry("800x350")
@@ -389,6 +392,12 @@ def update_args(button_txt : str, update_label : tk.Label):
     update_opflags(button_txt)
     update_label['text'] = label_txt
 
+def allof(all : ttk.Combobox, allcbx : list[str, ttk.Combobox]):
+    option = all.get()
+
+    for [path, combox] in allcbx:
+        combox.set(option)
+
 # For when a map is imported
 def set_repl_dicts(ip_repl_mstr=ip_repl_mstr, str_repl_mstr=str_repl_mstr, mac_repl_mstr=mac_repl_mstr):
     log.ip_repl = ip_repl_mstr
@@ -422,6 +431,12 @@ def obf_on_submit(progress: ttk.Progressbar):
     # In case a map is imported
     set_repl_dicts()
     
+    debug_log = None
+    global debug_mode
+    
+    if debug_mode:
+        debug_log = open("fortiobfuscate_debug.log", 'w')
+
     save_fedwalk_for_last = []
     amount_of_files = len(fp_combox_mapping)
 
@@ -429,7 +444,7 @@ def obf_on_submit(progress: ttk.Progressbar):
         modified_fp = path.replace(og_workspace, mod_workspace)
 
         if "config" in combo.get():
-            conf.mainLoop(opflags, path, modified_fp)
+            conf.mainLoop(opflags, path, modified_fp, debug_log)
             print(f"[CONFIG] - {path} obfuscated and written to {modified_fp}")
         elif "syslog" in combo.get():
             log.mainloop(opflags, path, modified_fp)
@@ -453,8 +468,11 @@ def obf_on_submit(progress: ttk.Progressbar):
         for num, (src, dst) in enumerate(save_fedwalk_for_last):
             fedwalk.mainloop(opflags, src, dst)
             print(f"[FEDWALK] - {path} obfuscated and written to {modified_fp}")
-
-
+    
+    if debug_log:
+        debug_log.close()
+        debug_mode = False
+        print("Submit Process Finished, debug mode has been turned off\n")
 
 options = {"-pi, --preserve-ips":"Program scrambles routable IP(v4&6) addresses by default, use this option to preserve original IP addresses",\
 		   "-pm, --preserve-macs":"Disable MAC address scramble",\
@@ -494,6 +512,8 @@ main_window = tk.Tk()
 main_window['bg'] = 'dark grey'
 main_window.geometry(f"{l}x{w}")
 main_window.title("FortiObfuscate")
+
+combox_options = ['config', 'syslog', 'pcap', 'fedwalk', 'exempt']
 
 label = tk.Label(main_window, text="FortiObfuscate - scrub syslog/config/pcap files and much more", font=("San Francisco", 20))
 label.grid(column=0, row=0)
@@ -555,6 +575,10 @@ scrubpayload_button.grid(column=0, row=1)
 scrubprivateIPs_button = ttk.Button(buttonarr, command=lambda : update_args("Scrub Private IPs", current_selected_args), text="Scrub Private IPs")
 scrubprivateIPs_button.grid(column=1, row=1)
 
+allOps = ttk.Combobox(buttonarr, values=combox_options)
+
+allOps.grid(column=1, row=2)
+
 help = ttk.Button(main_window, command=help, text="Help")
 help.grid(column=0, row=3)
 
@@ -570,8 +594,6 @@ progress.grid(column=0, row=6)
 # Build target directory for modified files in the backend
 mod_workspace, dirtree_of_workspace = buildDirTree(og_workspace)
 files = getFiles(dirtree_of_workspace)
-
-combox_options = ['config', 'syslog', 'pcap', 'fedwalk', 'exempt']
 
 for row, path in enumerate(files):
     inner = []
@@ -596,5 +618,15 @@ for row, path in enumerate(files):
     inner.extend([path, next_comb])
 
     fp_combox_mapping.append(inner)
+
+allButton = ttk.Button(buttonarr, text="All: ", command=lambda: allof(allOps, fp_combox_mapping))
+allButton.grid(column=0, row=2)
+
+def debugSwitch(event):
+    global debug_mode
+    debug_mode = not debug_mode
+    print(f"Debug mode mode set: {'ON' if debug_mode else 'OFF'}")
+
+main_window.bind("<F12>", debugSwitch)
 
 main_window.mainloop()
