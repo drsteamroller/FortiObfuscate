@@ -340,13 +340,16 @@ Option Buttons:\n\
         'Preserve IPs' = Do not perform scrubbing of IPs\n\
         'Preserve Strings' = Do not perform scrubbing of strings (usernames, device names, etc)\n\
         'Scrub PCAP Payloads' = Scrubs the upper layer protocol payloads (some, not all)\n\
-        'Scrub Private IPs' = Replaces RFC-1918 IP addresses with a randomize /16 address\n\n\
-The Submit button will perform the associated obfuscation operations on the files listed based on the selection and\n\
-with respect to the arguments chosen\n\n\
+        'Scrub Private IPs' = Replaces RFC-1918 IP addresses with a randomize /16 address\n\
+        'All:' = This is next to a list box, with the same options as beside each file.\n\
+                    When pressing 'All:' with a selection in the list box, all list boxes\n\
+                    will populate with the chosen value\n\n\
+The Submit button will perform the associated obfuscation operations on the files listed based\n\
+on the selection and with respect to the arguments chosen\n\n\
 To turn on Debug (detailed logs) mode: press <F12> when on the main screen of the program"
 
     helpPopupWin = tk.Tk()
-    helpPopupWin.geometry("800x350")
+    helpPopupWin.geometry("850x550")
     helpPopupWin.title("GUI - Help")
 
     helpBanner = ttk.Label(helpPopupWin, text="How to use FortiObfuscate", font=("San Francisco", 18))

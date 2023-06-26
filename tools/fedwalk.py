@@ -308,7 +308,7 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log: __file__):
 	with open(src_path, r_mode) as rf:
 		contents = rf.readlines()
 
-	debug_mes += f"[FEDWALK] Read {"binary" if r_mode == 'rb' else "text"} file successfully from {src_path}, entering obfuscation loop\n"
+	debug_mes += f"[FEDWALK] Read {'binary' if r_mode == 'rb' else 'text'} file successfully from {src_path}, entering obfuscation loop\n"
 
 	if r_mode == 'rb':
 		contents = modifyBinFile(contents)
@@ -319,4 +319,4 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log: __file__):
 	with open(dst_path, w_mode) as wf:
 		wf.writelines(contents)
 
-	debug_mes += f"[FEDWALK] Wrote modified {"binary" if w_mode == 'wb' else "text"} data to {dst_path}\n\n"
+	debug_mes += f"[FEDWALK] Wrote modified {'binary' if w_mode == 'wb' else 'text'} data to {dst_path}\n\n"
