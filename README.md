@@ -5,6 +5,7 @@ Fortinet Federal Tool to utilize consistent replacement across multiple differen
 ## Dependencies
 
 dpkt - Interprets PCAPs in a way where we can read them, manipulate protocol header/main body values, and then write the modifications to a new pcap file
+
 binaryornot - Simple module to check if a file is a binary file or a text file, for the fedwalk program.
 
 ```
@@ -30,7 +31,9 @@ Debug logging can be enabled by pressing 'F12' while on the main page of the GUI
 By default:
 
 Public/routable IP addresses are scrubbed in full (A.B.C.D -> W.X.Y.Z)
+
 User/Device names and usernames are scrubbed (see 'syslog' below, also ipsec phase1 names/ddns and snmp community names)
+
 MAC addresses are scrubbed in full 
 
 ## Why aren't all sensitive values getting scrubbed?
