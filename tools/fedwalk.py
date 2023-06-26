@@ -21,6 +21,7 @@ from binaryornot.check import is_binary
 
 opflags = []
 depth = 0
+debug_mes = ""
 
 str_repl = dict()
 ip_repl = dict()
@@ -203,58 +204,11 @@ def repl_dicts_to_logfile(filename):
 
 mtd = ""
 
-# Grab all directories going 'depth' number of steps deep
-# Opens a new directory to write modified files to
-def buildDirTree(dir):
-	mod_dir = f"{dir}_obfuscated"
-
-	mtd = mod_dir
-
-	dirTree = next(os.walk(dir))[0]
-	slashes = dirTree.count('/') + dirTree.count('\\')
-
-	dirTree = []
-
-	for dirpath, dirnames, fnames in os.walk(dir):
-		check = f"{dirpath}"
-
-		if ((check.count('/') + check.count('\\')) - slashes) > depth:
-			continue
-		
-		dirTree.append(check)
-
-	# Create new directory to house the modified files
-	os.makedirs(mod_dir, exist_ok=True)
-
-	moddirTree = dirTree.copy()
-	for i, path in enumerate(moddirTree):
-		a = re.search(dir, path)
-		moddirTree[i] = path[:a.span()[0]] + mod_dir + path[a.span()[1]:]
-
-		os.makedirs(moddirTree[i], exist_ok=True)
-	
-	return (mtd, dirTree)
-
-def getFiles(dirTree):
-	slash = '/'
-
-	files = []
-	# Gotta love Windows
-	if sys.platform == 'win32':
-		slash = '\\'
-	
-	# list comprehension ftw! dir + slash (/ or \) + filename
-	for dir in dirTree:
-		files.extend([f'{dir}{slash}{i}' for i in next(os.walk(dir))[2]])
-		if f'{dir}{slash}fedwalk.py' in files:
-			print(f"\nERROR: You cannot perform a fedwalk on a directory containing itself\n\nexiting...\n")
-			sys.exit()
-	
-	return files
-
 def modifyTxtFile(txtfile):
 	if type(txtfile) != list:
 		return txtfile
+
+	global debug_mes
 
 	for i, line in enumerate(txtfile):
 		
@@ -270,6 +224,7 @@ def modifyTxtFile(txtfile):
 			# actually replace
 			for ip in ipsearch:
 				line = line.replace(ip, replace_ip4(ip))
+				debug_mes += f'[FEDWALK\\txt] Found and replaced IPv4 address:\n\t{ip} -> {replace_ip4(ip)}\n'
 		
 		ip6search = ip6.findall(line)
 		
@@ -282,12 +237,15 @@ def modifyTxtFile(txtfile):
 
 			for i6 in ip6search:
 				line = line.replace(i6, replace_ip6(i6))
+				debug_mes += f'[FEDWALK\\txt] Found and replaced IPv6 address:\n\t{i6} -> {replace_ip6(i6)}\n'
+
 
 		for k, v in str_repl.items():
 			strsearch = re.findall(k, line)
 			if strsearch:
 				for ss in strsearch:
 					line = line.replace(ss, replace_str(ss))
+					debug_mes += f"[FEDWALK\\txt] Found and replaced string:\n\t{ss} -> {replace_str(ss)}\n\tNew: {line}\n"
 		
 		txtfile[i] = line
 
@@ -296,6 +254,8 @@ def modifyTxtFile(txtfile):
 def modifyBinFile(binfile):
 	if type(binfile) != list:
 		return binfile
+
+	global debug_mes
 
 	for i, line in enumerate(binfile):
 		
@@ -311,6 +271,7 @@ def modifyBinFile(binfile):
 			strrep = str(bip)[2:-1]
 			repl = bytes(replace_ip4(strrep), 'utf-8')
 			line = line.replace(bip, repl)
+			debug_mes += f'[FEDWALK\\bin] Found and replaced IPv4 address:\n\t{strrep} -> {replace_ip4(strrep)}\n'
 		
 		binfile[i] = line
 
@@ -327,74 +288,10 @@ def importStrs(filename):
 	for s in lines:
 		replace_str(s.strip('\n '))
 
-def importMap(filename):
-	lines = []
-	with open(filename, 'r') as o:
-		lines = o.readlines()
-
-	imp_ip = False
-	imp_mac = False
-	imp_str = False
-
-	OG = ""
-	for l in lines:
-		if '+---' in l:
-			if 'IP' in l:
-				imp_ip = True
-				imp_mac = False
-				imp_str = False
-			elif 'MAC' in l:
-				imp_ip = False
-				imp_mac = True
-				imp_str = False
-			elif 'STRING' in l:
-				imp_ip = False
-				imp_mac = False
-				imp_str = True
-			else:
-				print("Map file is improperly formatted, do not make changes to the map file unless you know what you are doing")
-				sys.exit(1)
-			continue
-
-		if not len(l):
-			continue
-
-		if imp_ip:
-			components = l.split(':')
-			if ('Original' in components[0]):
-				OG = components[1].strip()
-			else:
-				ip_repl[OG] = components[1].strip()
-				OG = ""
-		elif imp_mac:
-			components = l.split(':')
-			if ('Original' in components[0]):
-				OG = components[1].strip()
-			else:
-				#mac_repl[OG] = components[1]
-				OG = ""
-		elif imp_str:
-			components = l.split(':')
-			if ('Original' in components[0]):
-				OG = components[1].strip()
-			else:
-				str_repl[OG] = components[1].strip()
-				OG = ""
-		
-		else:
-			print("Something went wrong, mappings might not be fully imported\n")
-			print(f"Interpreted mappings based on import\nIP Mapping: {ip_repl}\nMAC Mapping:\nString Mapping: {str_repl}\n")
-
-options = {"-h": "Display this output",\
-		   "-sPIP": "Scrub private IPs. Assumes /16 subnet",\
-		   "-pi":"preserve all ip addresses",\
-		   "-pm":"preserve MAC addresses",\
-		   "-st=<stringfile>:":"Import a file containing strings you wish to replace (csv or newline separated values)",\
-		   "-map=<mapfilename>":"Import IP/MAC/String mappings from other FFI program output"}
-
-def mainloop(args: list, src_path: str, dst_path: str):
+def mainloop(args: list, src_path: str, dst_path: str, debug_log: __file__):
 
 	global opflags
+	global debug_mes
 	opflags = args
 
 	contents = None
@@ -411,6 +308,8 @@ def mainloop(args: list, src_path: str, dst_path: str):
 	with open(src_path, r_mode) as rf:
 		contents = rf.readlines()
 
+	debug_mes += f"[FEDWALK] Read {"binary" if r_mode == 'rb' else "text"} file successfully from {src_path}, entering obfuscation loop\n"
+
 	if r_mode == 'rb':
 		contents = modifyBinFile(contents)
 	
@@ -419,3 +318,5 @@ def mainloop(args: list, src_path: str, dst_path: str):
 	
 	with open(dst_path, w_mode) as wf:
 		wf.writelines(contents)
+
+	debug_mes += f"[FEDWALK] Wrote modified {"binary" if w_mode == 'wb' else "text"} data to {dst_path}\n\n"

@@ -1,0 +1,3 @@
+sys=log user=SUPER_CRITICAL_GUY srcip=192.168.0.1 dstip=8.8.8.8
+srcip=8.8.8.8 dstip=192.168.0.1 msg="message for SUPER_CRITICAL_GUY (Your information is exposed)"
+srcip=10.0.1.1 dstip=192.168.0.1 vd="inet_access" devname="USPS_FortiGate" msg="Information about SUPER_CRITICAL_GUY exfiltrated to 8.8.8.8"

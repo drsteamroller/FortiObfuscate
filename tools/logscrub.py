@@ -177,6 +177,7 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 				# ip addresses (also under"ui" & msg)
 				if ("srcip" in logentry.keys()):
 					replacement = ""
+					before = logentry['srcip']
 					if (':' in logentry["srcip"]):
 						if ("\"" in logentry['srcip']):
 							replacement = replace_ip6(logentry["srcip"][1:-1])
@@ -184,7 +185,7 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 						else:
 							replacement = replace_ip6(logentry["srcip"])
 							logentry["srcip"] = replacement
-						debug_mes += f"[SYSLOG] \\srcip (ipv6)\\ field identified and replaced:\n\t{logentry['srcip']} -> {replacement}\n"
+						debug_mes += f"[SYSLOG] \\srcip (ipv6)\\ field identified and replaced:\n\t{before} -> {replacement}\n"
 					else:
 						if ("\"" in logentry['srcip']):
 							replacement = replace_ip4(logentry["srcip"][1:-1])
@@ -192,10 +193,11 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 						else:
 							replacement = replace_ip4(logentry['srcip'])
 							logentry["srcip"] = replacement
-						debug_mes += f"[SYSLOG] \\srcip (ipv4)\\ field identified and replaced:\n\t{logentry['srcip']} -> {replacement}\n"
+						debug_mes += f"[SYSLOG] \\srcip (ipv4)\\ field identified and replaced:\n\t{before} -> {replacement}\n"
 
 				if ("dstip" in logentry.keys()):
 					replacement = ""
+					before = logentry['dstip']
 					if (':' in logentry["dstip"]):
 						if ("\"" in logentry['dstip']):
 							replacement = replace_ip6(logentry["dstip"][1:-1])
@@ -203,7 +205,7 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 						else:
 							replacement = replace_ip6(logentry["dstip"])
 							logentry["dstip"] = replacement
-						debug_mes += f"[SYSLOG] \\dstip (ipv6)\\ field identified and replaced:\n\t{logentry['dstip']} -> {replacement}\n"
+						debug_mes += f"[SYSLOG] \\dstip (ipv6)\\ field identified and replaced:\n\t{before} -> {replacement}\n"
 
 					else:
 						if ("\"" in logentry['dstip']):
@@ -212,7 +214,7 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 						else:
 							replacement = replace_ip4(logentry["dstip"])
 							logentry["dstip"] = replacement
-						debug_mes += f"[SYSLOG] \\dstip (ipv4)\\ field identified and replaced:\n\t{logentry['dstip']} -> {replacement}\n"
+						debug_mes += f"[SYSLOG] \\dstip (ipv4)\\ field identified and replaced:\n\t{before} -> {replacement}\n"
 
 
 				if ("ui" in logentry.keys()):
@@ -220,8 +222,8 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 					if (ip_search is None):
 						ip_search = ip6.search(logentry['ui'])
 					if (ip_search is not None):
-						logentry['ui'] = logentry['ui'][:ip_search.span()[0]] + replace_ip4(ip_search.group()) + logentry['ui'][ip_search.span()[1]:]
 						debug_mes += f"[SYSLOG] \\ui (ipv4)\\ field identified and replaced:\n\t{logentry[ip_search.span()[0]:ip_search.span()[1]]} -> {replace_ip4(ip_search.group())}\n"
+						logentry['ui'] = logentry['ui'][:ip_search.span()[0]] + replace_ip4(ip_search.group()) + logentry['ui'][ip_search.span()[1]:]
 				
 				# msg
 				if ("msg" in logentry.keys()):

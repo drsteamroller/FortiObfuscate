@@ -466,7 +466,7 @@ def obf_on_submit(progress: ttk.Progressbar):
         amount_of_files = len(save_fedwalk_for_last)
 
         for num, (src, dst) in enumerate(save_fedwalk_for_last):
-            fedwalk.mainloop(opflags, src, dst)
+            fedwalk.mainloop(opflags, src, dst, debug_log)
             print(f"[FEDWALK] - {path} obfuscated and written to {modified_fp}")
     
     if debug_log:
@@ -506,7 +506,7 @@ else:
 
 # First, either:
 # Set up GUI
-l, w = 775, 700
+l, w = 825, 725
 
 main_window = tk.Tk()
 main_window['bg'] = 'dark grey'
@@ -518,17 +518,8 @@ combox_options = ['config', 'syslog', 'pcap', 'fedwalk', 'exempt']
 label = tk.Label(main_window, text="FortiObfuscate - scrub syslog/config/pcap files and much more", font=("San Francisco", 20))
 label.grid(column=0, row=0)
 
-m_frame = tk.Frame(main_window, height=500, width=700, padx=10, pady=25, bg='black', bd=1, relief="raised")
+m_frame = tk.Frame(main_window, height=500, width=800, padx=10, pady=25, bg='black', bd=1, relief="raised")
 m_frame.grid(column=0, row=1)
-
-
-'''
-treeframe = tk.Frame(m_frame, padx=5, pady=5, bg="dark grey", bd=1, relief="sunken")
-treeframe.grid(column=0, row=0)
-
-comboframe = tk.Frame(m_frame, padx=5, pady=5, bg="dark grey", bd=1, relief="sunken")
-comboframe.grid(column=1, row=0)
-'''
 
 switchframe = tk.Frame(main_window, padx=5, pady=5, bg="dark grey", bd=1, relief="sunken")
 switchframe.grid(column=0, row=2)
@@ -606,11 +597,11 @@ for row, path in enumerate(files):
     next_comb.pack(anchor='e')
     '''
 
-    nextFrame = tk.Frame(m_frame, height=25, width=750, padx=5, pady=3, bg="dark grey", bd=1, relief='raised')
+    nextFrame = tk.Frame(m_frame, height=25, width=800, padx=5, pady=3, bg="dark grey", bd=1, relief='raised')
     nextFrame.grid_propagate(0)
     nextFrame.grid(column=0, row=row)
     next_label = ttk.Label(nextFrame, justify="left", width=100, text=path)
-    next_comb = ttk.Combobox(nextFrame, justify='right', width=20, values=combox_options)
+    next_comb = ttk.Combobox(nextFrame, justify='right', width=8, values=combox_options)
 
     next_label.grid(column=0, row=0)
     next_comb.grid(column=1, row=0)

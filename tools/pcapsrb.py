@@ -637,12 +637,14 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 				if (isinstance(ip.data, dpkt.tcp.TCP) and ip.p == 6):
 					if ('-sp' in opflags or '--scrub-payload' in opflags):
 						tcp = ip.data
+						debug_mes += f"[PCAP] Entering upper layer protocol scrub (TCP)"
 						tcp.data = scrub_upper_prots(tcp.data, tcp.sport, tcp.dport)
 
 				# UDP instance, possibly overwrite payload
 				if (isinstance(ip.data, dpkt.udp.UDP) and ip.p == 17):
 					if ('-sp' in opflags or '--scrub-payload' in opflags):
 						udp = ip.data
+						debug_mes += f"[PCAP] Entering upper layer protocol scrub (UDP)"
 						udp.data = scrub_upper_prots(udp.data, udp.sport, udp.dport)
 
 			# Replace ARP ethernet & ip address info
@@ -652,6 +654,7 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 					# Replace source/destination mac in arp data body
 					arp.sha = replace_mac(arp.sha)
 					arp.tha = replace_mac(arp.tha)
+					debug_mes += f"[PCAP] \\arp\\ Sender & Target Hardware Addresses replaced"
 				if("-pi" not in opflags and "--preserve-ips" not in opflags):
 					if (len(arp.spa.hex()) <= 12):
 						arp.spa = replace_ip(arp.spa)
@@ -660,7 +663,8 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 					if (len(arp.tha.hex()) <= 12):
 						arp.tpa = replace_ip(arp.tpa)
 					else:
-						arp.tpa = replace_ip6(arp.tpa)			
+						arp.tpa = replace_ip6(arp.tpa)	
+					debug_mes += f"[PCAP] \\arp\\ Sender & Target Protocol Addresses replaced"		
 
 			else:
 				try:
@@ -680,12 +684,14 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 					if (isinstance(ip.data, dpkt.tcp.TCP) and ip.p == 6):
 						if ('-sp' in opflags or '--scrub-payload' in opflags):
 							tcp = ip.data
+							debug_mes += f"[PCAP] Entering upper layer protocol scrub (TCP)"
 							tcp.data = scrub_upper_prots(tcp.data, tcp.sport, tcp.dport)
 
 					# UDP instance, possibly overwrite payload
 					if (isinstance(ip.data, dpkt.udp.UDP) and ip.p == 17):
 						if ('-sp' in opflags or '--scrub-payload' in opflags):
 							udp = ip.data
+							debug_mes += f"[PCAP] Entering upper layer protocol scrub (UDP)"
 							udp.data = scrub_upper_prots(udp.data, udp.sport, udp.dport)
 				except:
 					debug_mes += f"[PCAP] Packet at timestamp: {datetime.datetime.utcfromtimestamp(timestamp)} is of non IP Packet type, therefore unsupported (as of right now)"
