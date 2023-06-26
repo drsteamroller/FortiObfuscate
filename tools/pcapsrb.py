@@ -142,26 +142,34 @@ def replace_str(s):
 
 # takes TCP/UDP packet data and determines/scrubs the data based on standard ports
 def scrub_upper_prots(pkt, sport, dport):
+
+	global debug_mes
+
 	# UDP only protocols
 	#	TFTP <
 	# 	I need to track the ports after the first request, since the server picks an ephemeral port after the first request packet
 	if (sport in protocol_ports['tftp'] or dport in protocol_ports['tftp']):
 		pkt = dpkt.tftp.TFTP(pkt)
 
+		debug_mes += f'[PCAP] TFTP detected\n'
 		# Sort of keep track of new tftp sessions
 		if (dport == 69):
 			protocol_ports['tftp'].append(sport)
+			debug_mes += f'[PCAP\\TFTP] Appended sport for return traffic: {sport}\n'
 		mask = ""
 		for g in range(len(pkt.data)*2):
 			i = random.randint(0,15)
 			mask += f"{i:x}"
+		og = pkt.data
 		pkt.data = bytes.fromhex(mask)
+		debug_mes += f'[PCAP\\TFTP] Replaced TFTP data:\n\t{og} -> {pkt.data}\n'
 
 	# 	DHCP <
 	elif (sport in protocol_ports['dhcp'] or dport in protocol_ports['dhcp']):
 		try:
 			pkt = dpkt.dhcp.DHCP(pkt)
 
+			debug_mes += f'[PCAP] DHCP detected\n'
 			# Since dpkt's DHCP module interprets ips as ints, we have to do this
 			c = hex(pkt.ciaddr)[2:]
 			c = '0'*(8-len(c)) + c
@@ -190,7 +198,8 @@ def scrub_upper_prots(pkt, sport, dport):
 				options.append(innerlist)
 
 			for i in range(len(options)):
-
+				
+				debug_mes += f'[PCAP\\DHCP] Option: {options[i][0]}'
 				# option 3 (Untested)
 				if (options[i][0] == 3):
 					ip = replace_ip(options[i][1])
@@ -241,10 +250,11 @@ def scrub_upper_prots(pkt, sport, dport):
 			# probably isn't necessary, but why not
 			pkt.opts = tuple(options)
 		except Exception as e:
+			debug_mes += f'[PCAP] Error trying to interpret packet as a DHCP packet:\n\tSPORT: {sport}; DPORT:{dport}\n'
 			return pkt
 
 	# HTTP request (does not work)
-	elif (dport in protocol_ports['http']):
+	elif False: #(dport in protocol_ports['http']):
 		ogpkt = pkt
 		mes = None
 		try:
@@ -279,6 +289,8 @@ def scrub_upper_prots(pkt, sport, dport):
 	elif (sport in protocol_ports['radius'] or dport in protocol_ports['radius']):
 		pkt = dpkt.radius.RADIUS(pkt)
 
+		debug_mes += f'[PCAP] RADIUS packet detected\n'
+
 		total_len = 20
 		# Convert the tuples into a list so we can manipulate values
 		attrlist = []
@@ -286,6 +298,9 @@ def scrub_upper_prots(pkt, sport, dport):
 			attrlist.append([t,d])
 
 		for off, [t, d] in enumerate(attrlist):
+
+			debug_mes += f'[PCAP\\RADIUS] RADIUS option: {t}\n'
+
 			if t == dpkt.radius.RADIUS_USER_NAME:
 				d = bytes(replace_str(d), 'utf-8')
 			
@@ -333,8 +348,8 @@ def scrub_upper_prots(pkt, sport, dport):
 					if (len(nodash) < 17): nodash += '0'
 					
 					d = nodash
+				
 				else:
-
 					d = str(d)[2:-1]
 
 					octets = d.split('.')
@@ -521,7 +536,7 @@ options = {"-pi, --preserve-ips":"Program scrambles routable IP(v4&6) addresses 
 			"-ns":"Non-standard ports used. By default pcapsrb.py assumes standard port usage, use this option if the pcap to be scrubbed uses non-standard ports. For more info on usage, run \'python pcapsrb.py -ns -h\'",\
 			"-map=<MAPFILE>":"Take a map file output from any FFI program and input it into this program to utilize the same replacements"}
 
-def mainloop(args: list, src_path: str, dst_path: str, debug_log):
+def mainloop(args: list, src_path: str, dst_path: str, debug_log: __file__):
 
 	global opflags
 	global debug_mes
@@ -638,14 +653,14 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 				if (isinstance(ip.data, dpkt.tcp.TCP) and ip.p == 6):
 					if ('-sp' in opflags or '--scrub-payload' in opflags):
 						tcp = ip.data
-						debug_mes += f"[PCAP] Entering upper layer protocol scrub (TCP)"
+						debug_mes += f"[PCAP] Entering upper layer protocol scrub (TCP)\n"
 						tcp.data = scrub_upper_prots(tcp.data, tcp.sport, tcp.dport)
 
 				# UDP instance, possibly overwrite payload
 				if (isinstance(ip.data, dpkt.udp.UDP) and ip.p == 17):
 					if ('-sp' in opflags or '--scrub-payload' in opflags):
 						udp = ip.data
-						debug_mes += f"[PCAP] Entering upper layer protocol scrub (UDP)"
+						debug_mes += f"[PCAP] Entering upper layer protocol scrub (UDP)\n"
 						udp.data = scrub_upper_prots(udp.data, udp.sport, udp.dport)
 
 			# Replace ARP ethernet & ip address info
@@ -655,7 +670,7 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 					# Replace source/destination mac in arp data body
 					arp.sha = replace_mac(arp.sha)
 					arp.tha = replace_mac(arp.tha)
-					debug_mes += f"[PCAP] \\arp\\ Sender & Target Hardware Addresses replaced"
+					debug_mes += f"[PCAP] \\arp\\ Sender & Target Hardware Addresses replaced\n"
 				if("-pi" not in opflags and "--preserve-ips" not in opflags):
 					if (len(arp.spa.hex()) <= 12):
 						arp.spa = replace_ip(arp.spa)
@@ -665,7 +680,7 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 						arp.tpa = replace_ip(arp.tpa)
 					else:
 						arp.tpa = replace_ip6(arp.tpa)	
-					debug_mes += f"[PCAP] \\arp\\ Sender & Target Protocol Addresses replaced"		
+					debug_mes += f"[PCAP] \\arp\\ Sender & Target Protocol Addresses replaced\n"		
 
 			else:
 				try:
@@ -685,14 +700,14 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 					if (isinstance(ip.data, dpkt.tcp.TCP) and ip.p == 6):
 						if ('-sp' in opflags or '--scrub-payload' in opflags):
 							tcp = ip.data
-							debug_mes += f"[PCAP] Entering upper layer protocol scrub (TCP)"
+							debug_mes += f"[PCAP] Entering upper layer protocol scrub (TCP*)\n"
 							tcp.data = scrub_upper_prots(tcp.data, tcp.sport, tcp.dport)
 
 					# UDP instance, possibly overwrite payload
 					if (isinstance(ip.data, dpkt.udp.UDP) and ip.p == 17):
 						if ('-sp' in opflags or '--scrub-payload' in opflags):
 							udp = ip.data
-							debug_mes += f"[PCAP] Entering upper layer protocol scrub (UDP)"
+							debug_mes += f"[PCAP] Entering upper layer protocol scrub (UDP*)\n"
 							udp.data = scrub_upper_prots(udp.data, udp.sport, udp.dport)
 				except:
 					debug_mes += f"[PCAP] Packet at timestamp: {datetime.datetime.utcfromtimestamp(timestamp)} is of non IP Packet type, therefore unsupported (as of right now)"

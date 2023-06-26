@@ -473,7 +473,7 @@ def obf_on_submit(progress: ttk.Progressbar):
                 debug_log.write(f'{k} -> {v}\n')
             
             debug_log.close()
-            sys.exit()
+            sys.exit(1)
 
         progress['value'] = ((num+1)/amount_of_files)*100
 
@@ -502,7 +502,7 @@ def obf_on_submit(progress: ttk.Progressbar):
                 debug_log.write(f'{k} -> {v}\n')
             
             debug_log.close()
-            sys.exit()
+            sys.exit(1)
     
     if debug_log:
         debug_log.close()
