@@ -46,6 +46,6 @@ config: This program is written specifically for FortiGate configuration files, 
 
 syslog: This program is written for syslog files (\<attribute\>=\<value\>). Some lesser used attribute values are not scrubbed, the ones that this program looks out for are: 'user', 'src/dstip', 'devname', 'vd', and 'ui'
 
-'pcap': This program is, surprise surprise, written for pcap files. Accompanying this program, there's a 'Scrub upper layer protocols' option which will go through the data in upper level protocols and mask critical values. Check ports.txt to see a list of protocols scrubbed (minus http), and you can change the standard ports if the pcap provided utilizes different ports (use a list of values [port1, port2, ...]) if multiple non-standard ports are used between pcaps.
+pcap: This program is, surprise surprise, written for pcap files. Accompanying this program, there's a 'Scrub upper layer protocols' option which will go through the data in upper level protocols and mask critical values. Check ports.txt to see a list of protocols scrubbed (minus http), and you can change the standard ports if the pcap provided utilizes different ports (use a list of values [port1, port2, ...]) if multiple non-standard ports are used between pcaps.
 
 fedwalk: this program specifically only looks for ip address patterns, and will replace any strings that have been cached by the previously mentioned programs. If you are only using 'fedwalk' on all your files, it will not replace any sensitive string values.

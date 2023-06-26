@@ -326,7 +326,7 @@ def fromPCAPFormat(ip_repl_mstr=ip_repl_mstr, p_ip_repl=pcap.ip_repl, mac_repl_m
         
         if og_str not in str_repl_mstr.keys():
             str_repl_mstr[og_str] = rep_str
-
+        
 # Button Functions
 # GUI-based help output explaining what each combobox option is and what it does, and debug based help
 def help():
@@ -407,7 +407,6 @@ def set_repl_dicts(ip_repl_mstr=ip_repl_mstr, str_repl_mstr=str_repl_mstr, mac_r
     conf.ip_repl = ip_repl_mstr
     fedwalk.ip_repl = ip_repl_mstr
 
-    pcap.str_repl = str_repl_mstr
     log.str_repl = str_repl_mstr
     conf.str_repl = str_repl_mstr
     fedwalk.str_repl = str_repl_mstr
@@ -421,7 +420,6 @@ def append_mstr_dicts(ip_repl_mstr=ip_repl_mstr, str_repl_mstr=str_repl_mstr, ma
     ip_repl_mstr = log.ip_repl | ip_repl_mstr
     ip_repl_mstr = conf.ip_repl | ip_repl_mstr
     ip_repl_mstr = fedwalk.ip_repl | ip_repl_mstr
-    str_repl_mstr = pcap.str_repl | str_repl_mstr
     str_repl_mstr = log.str_repl | str_repl_mstr
     str_repl_mstr = conf.str_repl | str_repl_mstr
     str_repl_mstr = fedwalk.str_repl | str_repl_mstr
@@ -446,19 +444,36 @@ def obf_on_submit(progress: ttk.Progressbar):
     for num, [path, combo] in enumerate(fp_combox_mapping):
         modified_fp = path.replace(og_workspace, mod_workspace)
 
-        if "config" in combo.get():
-            conf.mainLoop(opflags, path, modified_fp, debug_log)
-            print(f"[CONFIG] - {path} obfuscated and written to {modified_fp}")
-        elif "syslog" in combo.get():
-            log.mainloop(opflags, path, modified_fp, debug_log)
-            print(f"[SYSLOG] - {path} obfuscated and written to {modified_fp}")
-        elif "pcap" in combo.get():
-            pcap.mainloop(opflags, path, modified_fp)
-            print(f"[PCAP] - {path} obfuscated and written to {modified_fp}")
-        elif "fedwalk" in combo.get():
-            save_fedwalk_for_last.append((path, modified_fp))
-        else:
-            print(f"[EXEMPT] - {path} exempted and copied to {modified_fp}")
+        try:
+            if "config" in combo.get():
+                conf.mainLoop(opflags, path, modified_fp, debug_log)
+                print(f"[CONFIG] - {path} obfuscated and written to {modified_fp}")
+            elif "syslog" in combo.get():
+                log.mainloop(opflags, path, modified_fp, debug_log)
+                print(f"[SYSLOG] - {path} obfuscated and written to {modified_fp}")
+            elif "pcap" in combo.get():
+                pcap.mainloop(opflags, path, modified_fp, debug_log)
+                print(f"[PCAP] - {path} obfuscated and written to {modified_fp}")
+            elif "fedwalk" in combo.get():
+                save_fedwalk_for_last.append((path, modified_fp))
+            else:
+                print(f"[EXEMPT] - {path} exempted and copied to {modified_fp}")
+        except Exception as e:
+            if not debug_log:
+                debug_log = open("error.log", 'w')
+            debug_log.write(f'Program encountered an unexpected error while performing {combo.get()} obf on {path}:\n\t{e}\n\n')
+            debug_log.write(f'Master Dictionaries:\n\nIPs:\n')
+            for k, v in ip_repl_mstr.items():
+                debug_log.write(f'{k} -> {v}\n')
+            debug_log.write(f'\nMAC Addresses:\n')
+            for k, v in mac_repl_mstr.items():
+                debug_log.write(f'{k} -> {v}\n')
+            debug_log.write(f'\nStrings:\n')
+            for k, v in str_repl_mstr.items():
+                debug_log.write(f'{k} -> {v}\n')
+            
+            debug_log.close()
+            sys.exit()
 
         progress['value'] = ((num+1)/amount_of_files)*100
 
@@ -468,9 +483,26 @@ def obf_on_submit(progress: ttk.Progressbar):
     if len(save_fedwalk_for_last) > 0:
         amount_of_files = len(save_fedwalk_for_last)
 
-        for num, (src, dst) in enumerate(save_fedwalk_for_last):
-            fedwalk.mainloop(opflags, src, dst, debug_log)
-            print(f"[FEDWALK] - {path} obfuscated and written to {modified_fp}")
+        try:
+            for num, (src, dst) in enumerate(save_fedwalk_for_last):
+                fedwalk.mainloop(opflags, src, dst, debug_log)
+                print(f"[FEDWALK] - {path} obfuscated and written to {modified_fp}")
+        except Exception as e:
+            if not debug_log:
+                debug_log = open("error.log", 'w')
+            debug_log.write(f'Program encountered an unexpected error while performing {combo.get()} obf on {path}:\n\t{e}\n\n')
+            debug_log.write(f'Master Dictionaries:\n\nIPs:\n')
+            for k, v in ip_repl_mstr.items():
+                debug_log.write(f'{k} -> {v}\n')
+            debug_log.write(f'\nMAC Addresses:\n')
+            for k, v in mac_repl_mstr.items():
+                debug_log.write(f'{k} -> {v}\n')
+            debug_log.write(f'\nStrings:\n')
+            for k, v in str_repl_mstr.items():
+                debug_log.write(f'{k} -> {v}\n')
+            
+            debug_log.close()
+            sys.exit()
     
     if debug_log:
         debug_log.close()
@@ -622,5 +654,6 @@ def debugSwitch(event):
     print(f"Debug mode mode set: {'ON' if debug_mode else 'OFF'}")
 
 main_window.bind("<F12>", debugSwitch)
+
 
 main_window.mainloop()

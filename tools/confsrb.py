@@ -171,11 +171,14 @@ def show():
 def export(modfile_name):
     modfilenames = [modfile_name]
     global debug_mes
+    global contents
 
     for index, w_file in enumerate(modfilenames):
         with open(w_file, 'w') as write:
-            for line in contents[index]:
-                write.write(line)
+            if contents:
+                for line in contents[0]:
+                    write.write(line)
+                contents = []
     
     debug_mes += f"[CONF] Finished obfuscation, wrote modifications to {modfile_name}\n"
 

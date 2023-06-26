@@ -286,7 +286,6 @@ def scrub_upper_prots(pkt, sport, dport):
 			attrlist.append([t,d])
 
 		for off, [t, d] in enumerate(attrlist):
-			print(f"Before: {d}")
 			if t == dpkt.radius.RADIUS_USER_NAME:
 				d = bytes(replace_str(d), 'utf-8')
 			
@@ -563,6 +562,8 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 		print(out)
 		debug_mes += out
 		sys.exit()
+
+	pcap = None
 
 	try:
 		pcap = dpkt.pcap.Reader(f)
