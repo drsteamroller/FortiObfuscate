@@ -244,7 +244,7 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 					original = ""
 					if (logentry['devname'] not in str_repl.keys()):
 						original = d = logentry['devname']
-						replacement = str_repl[d] = logentry['devname'] = f'"US_FED_DEV_{replace_str(d)}"'
+						replacement = str_repl[d] = logentry['devname'] = f'"{replace_str(d)}"'
 					else:
 						logentry['devname'] = str_repl[logentry['devname']]
 					debug_mes += f"[SYSLOG] \\devname\\ field identified and replaced:\n\t{original} -> {replacement}\n"
@@ -256,7 +256,7 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log):
 					if (logentry['vd'] != "root" ):
 						if (logentry['vd'] not in str_repl.keys()):
 							original = v = logentry['vd']
-							replacement = str_repl[v] = logentry['vd'] = f'"US_FED_VDOM_{replace_str(v)}"'
+							replacement = str_repl[v] = logentry['vd'] = f'"{replace_str(v)}"'
 						else:
 							logentry['vd'] = str_repl[logentry['vd']]
 					debug_mes += f"[SYSLOG] \\vd\\ field identified and replaced:\n\t{original} -> {replacement}\n"
