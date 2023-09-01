@@ -225,7 +225,8 @@ def obfuscate(conf):
     is_ip4 = re.compile(ipaddr4)
     is_ip6 = re.compile(ipaddr6, re.MULTILINE)
 
-    # Flags to look for "edit <name>" within snmp/vpn config
+    # Flags to look for "edit <name>" within snmp/vpn/VDOM config
+    VDOM = False
     SNMP = False
     SNMP_HOSTS = False
     IPSEC_P1 = False
@@ -237,15 +238,20 @@ def obfuscate(conf):
         # Record the number of leading spaces, so we aren't having awkward lines that aren't in-line
         leading = " " * re.search('\S', content).start()
         
-        # If we see 'set hostname' or 'set alias', replace those with 'US Federal Customer'
-        if ("set hostname" in content or "set alias" in content or "description" in content):
+        # If we see certain values containing potentially sensitive strings, replace them
+        if ("set hostname" in content or "set alias" in content or "description" in content or 'set vdom' in content):
             l = []
             name_o = ""
             name_r = ""
             try:
                 l = content.strip().split(" ")
+                if len(l) > 3:
+                    l[2] = " ".join(l[2:])
+                    l = l[0:3]
+                if '"' in l[2]:
+                    l[2] = l[2][1:-1]
                 name_o = l[2].strip("\n")
-                name_r = f"US_Fed_Cx_{replace_str(l[2])}"
+                name_r = f"{replace_str(l[2])}"
                 l[2] = f"{name_r}\n"
             except IndexError:
                 debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
@@ -309,149 +315,200 @@ def obfuscate(conf):
                 debug_mes += f"[CONF] \\IPv6 address REGEX encountered\\ statement enountered and replaced at line #{i}\n\t{ip_o}  ->  {ip_r}\n"
                 content = leading + "\n"
         
+        # special case catch
+        elif 'set management-ip' in content:
+            try:
+                s = content.strip().split(" ")
+                if len(s) > 3:
+                    s[2] = " ".join(s[2:])
+                    s = s[:3]
+                if '"' in s[2]:
+                    s[2] = s[2][1:-1]
+                name = s[2]
+                s[2] = replace_str(s[2])
+                leading += " ".join(s)                
+            except IndexError:
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+            except Exception as e:
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+            else:
+                debug_mes += f"[CONF] \\management-ip\\ statement enountered and replaced at line #{i}\n\t{name}  ->  {replace_str(s[2])}\n"
+                content = leading + "\n"
+
+        # General replacement
+        if 'set comment' in content:
+            content = leading + 'set comment ""\n'
+            debug_mes += f"[CONF] \\set comment\\ statement encountered and erased at line #{i}\n"
+
+        # Specific KEY-VALUE pair search:
+        if "config vdom" in content:
+            VDOM = True
+            continue
+
+        if VDOM and 'edit' in content:
+            try:
+                s = content.strip().split(" ")
+                if len(s) > 2:
+                    s[1] = " ".join(s[1:])
+                    s = s[:2]
+                if '"' in s[1]:
+                    s[1] = s[1][1:-1]
+                name = s[1]
+                s[1] = replace_str(s[1])
+                leading += " ".join(s)                
+            except IndexError:
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+            except Exception as e:
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+            else:
+                debug_mes += f"[CONF] \\vdom > 'edit'\\ statement enountered and replaced at line #{i}\n\t{name}  ->  {replace_str(s[1])}\n"
+                content = leading + "\n"
+
+        if VDOM and 'end' in content:
+            VDOM = False
+            continue
+
         ### SNMP Communities ###
-        if ("-ps" not in opflags):
-            if ("config system snmp community" in content or "config system snmp user" in content):
-                SNMP = True
-            
-            if (not SNMP_HOSTS and SNMP and "edit" in content):
-                s = []
-                name = ""
-                try:
-                    s = content.strip().split(" ")
-                    if (len(g) > 1):
-                        name = s[1]
-                        s[1] = f'fed_snmp_comm_{replace_str(name)}'
-                    
-                    leading += " ".join(s)
-                except IndexError:
-                    debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
-                except Exception as e:
-                    debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
-                else:
-                    debug_mes += f"[CONF] \\snmp | snmp_hosts > 'edit'\\ statement enountered and replaced at line #{i}\n\t{s[2]}  ->  {replace_str(name)}\n"
-                    content = leading + "\n"
+        if ("config system snmp community" in content or "config system snmp user" in content):
+            SNMP = True
+        
+        if (not SNMP_HOSTS and SNMP and "edit" in content):
+            s = []
+            name = ""
+            try:
+                s = content.strip().split(" ")
+                if (len(g) > 1):
+                    name = s[1]
+                    s[1] = f'{replace_str(name)}'
+                
+                leading += " ".join(s)
+            except IndexError:
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+            except Exception as e:
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+            else:
+                debug_mes += f"[CONF] \\snmp | snmp_hosts > 'edit'\\ statement enountered and replaced at line #{i}\n\t{s[1]}  ->  {replace_str(name)}\n"
+                content = leading + "\n"
 
-            if (SNMP and "config hosts" in content):
-                SNMP_HOSTS = True
+        if (SNMP and "config hosts" in content):
+            SNMP_HOSTS = True
 
-            if (SNMP_HOSTS and "edit" in content):
-                s = []
-                name = ""
-                try:
-                    s = content.strip().split(" ")
-                    if (len(g) > 1):
-                        name = s[1]
-                        s[1] = f'fed_snmp_comm_{replace_str(name)}'
+        if (SNMP_HOSTS and "edit" in content):
+            s = []
+            name = ""
+            try:
+                s = content.strip().split(" ")
+                if (len(g) > 1):
+                    name = s[1]
+                    s[1] = f'{replace_str(name)}'
 
-                    leading += " ".join(s)
-                except IndexError:
-                    debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
-                except Exception as e:
-                    debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
-                else:
-                    debug_mes += f"[CONF] \\SNMPv3 config hosts > 'edit'\\ statement enountered and replaced at line #{i}\n\t{s[2]}  ->  {replace_str(name)}\n"
-                    content = leading + "\n"
+                leading += " ".join(s)
+            except IndexError:
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+            except Exception as e:
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+            else:
+                debug_mes += f"[CONF] \\SNMPv3 config hosts > 'edit'\\ statement enountered and replaced at line #{i}\n\t{s[1]}  ->  {replace_str(name)}\n"
+                content = leading + "\n"
 
-            if (SNMP and "name" in content):
-                s = []
-                name = ""
-                try:
-                    s = content.strip().split(" ")
-                    name = s[2]
-                    leading += f'{s[0]} {s[1]} FED_SNMP_{name}\n'
-                except IndexError:
-                    debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
-                except Exception as e:
-                    debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
-                else:
-                    debug_mes += f"[CONF] \\SNMP edit name\\ statement enountered and replaced at line #{i}\n\t{s[2]}  ->  {replace_str(name)}\n"
-                    content = leading
+        if (SNMP and "name" in content):
+            s = []
+            name = ""
+            try:
+                s = content.strip().split(" ")
+                name = s[2]
+                leading += f'{s[0]} {s[1]} {replace_str(name)}\n'
+            except IndexError:
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+            except Exception as e:
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+            else:
+                debug_mes += f"[CONF] \\SNMP edit name\\ statement enountered and replaced at line #{i}\n\t{s[2]}  ->  {replace_str(name)}\n"
+                content = leading
 
-            if (SNMP_HOSTS and "end" in content):
-                SNMP_HOSTS = False
-            
-            if (not SNMP_HOSTS and SNMP and "end" in content):
-                SNMP = False
+        if (SNMP_HOSTS and "end" in content):
+            SNMP_HOSTS = False
+        
+        if (not SNMP_HOSTS and SNMP and "end" in content):
+            SNMP = False
         
         ### VPN Tunnel Names ###
-        if ("-pv" not in opflags):
-            if ("config vpn ipsec phase1-interface" in content):
-                IPSEC_P1 = True
+        if ("config vpn ipsec phase1-interface" in content):
+            IPSEC_P1 = True
 
-            if ("config vpn ipsec phase2-interface" in content):
-                IPSEC_P2 = True
+        if ("config vpn ipsec phase2-interface" in content):
+            IPSEC_P2 = True
 
-            if (IPSEC_P1 and "set remotegw-ddns" in content):
-                v = []
-                repl = ""
-                try:
-                    v = content.strip().split(" ")
-                    
-                    repl = f'{replace_str(v[2])}.net'
-                    
-                    leading += f'{v[0]} {v[1]} {repl}\n'
-                except IndexError:
-                    debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
-                except Exception as e:
-                    debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
-                else:
-                    debug_mes += f"[CONF] \\IPSEC P1 set remotegw-ddns\\ statement enountered and replaced at line #{i}\n\t{v[2]}  ->  {repl}\n"
-                    content = leading
-
-            if (IPSEC_P1 and "edit" in content):
-                v = []
-                repl = ""
-                try:
-                    v = content.strip().split(" ")
-                    repl = f'vpn_p1_{replace_str(v[1])}'
-
-                    leading += f"{v[0]} {repl}\n"
-                except IndexError:
-                    debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
-                except Exception as e:
-                    debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
-                else:
-                    debug_mes += f"[CONF] \\IPSEC P1 edit\\ statement enountered and replaced at line #{i}\n\t{v[2]}  ->  {repl}\n"
-                    content = leading
+        if (IPSEC_P1 and "set remotegw-ddns" in content):
+            v = []
+            repl = ""
+            try:
+                v = content.strip().split(" ")
                 
-            if (IPSEC_P2 and "edit" in content):
-                v = []
-                repl = ""
-                try:
-                    v = content.strip().split(" ")
-                    repl = f'vpn_p2_{replace_str(v[1])}'
+                repl = f'{replace_str(v[2])}'
+                
+                leading += f'{v[0]} {v[1]} {repl}\n'
+            except IndexError:
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+            except Exception as e:
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+            else:
+                debug_mes += f"[CONF] \\IPSEC P1 set remotegw-ddns\\ statement enountered and replaced at line #{i}\n\t{v[2]}  ->  {repl}\n"
+                content = leading
 
-                    leading += f"{v[0]} {repl}\n"
-                except IndexError:
-                    debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
-                except Exception as e:
-                    debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
-                else:
-                    debug_mes += f"[CONF] \\IPSEC P2 edit\\ statement enountered and replaced at line #{i}\n\t{v[2]}  ->  {repl}\n"
-                    content = leading
+        if (IPSEC_P1 and "edit" in content):
+            v = []
+            repl = ""
+            try:
+                v = content.strip().split(" ")
+                repl = f'{replace_str(v[1])}'
+
+                leading += f"{v[0]} {repl}\n"
+            except IndexError:
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+            except Exception as e:
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+            else:
+                debug_mes += f"[CONF] \\IPSEC P1 edit\\ statement enountered and replaced at line #{i}\n\t{v[1]}  ->  {repl}\n"
+                content = leading
             
-            if (IPSEC_P2 and "set phase1name" in content):
-                v = []
-                repl = ""
-                try:
-                    v = content.strip().split(" ")
-                    repl = replace_str(v[2])
-                    
-                    leading += f"{v[0]} {v[1]} {repl}\n"
-                except IndexError:
-                    debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
-                except Exception as e:
-                    debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
-                else:
-                    debug_mes += f"[CONF] \\IPSEC P2 set phase1name\\ statement enountered and replaced at line #{i}\n\t{v[2]}  ->  {repl}\n"
-                    content = leading
+        if (IPSEC_P2 and "edit" in content):
+            v = []
+            repl = ""
+            try:
+                v = content.strip().split(" ")
+                repl = f'vpn_p2_{replace_str(v[1])}'
 
-            if (IPSEC_P1 and "end" in content):
-                IPSEC_P1 = False
+                leading += f"{v[0]} {repl}\n"
+            except IndexError:
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+            except Exception as e:
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+            else:
+                debug_mes += f"[CONF] \\IPSEC P2 edit\\ statement enountered and replaced at line #{i}\n\t{v[1]}  ->  {repl}\n"
+                content = leading
+        
+        if (IPSEC_P2 and "set phase1name" in content):
+            v = []
+            repl = ""
+            try:
+                v = content.strip().split(" ")
+                repl = replace_str(v[2])
+                
+                leading += f"{v[0]} {v[1]} {repl}\n"
+            except IndexError:
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+            except Exception as e:
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+            else:
+                debug_mes += f"[CONF] \\IPSEC P2 set phase1name\\ statement enountered and replaced at line #{i}\n\t{v[2]}  ->  {repl}\n"
+                content = leading
 
-            if (IPSEC_P2 and "end" in content):
-                IPSEC_P2 = False
+        if (IPSEC_P1 and "end" in content):
+            IPSEC_P1 = False
+
+        if (IPSEC_P2 and "end" in content):
+            IPSEC_P2 = False
 
         conf[i] = content
 
