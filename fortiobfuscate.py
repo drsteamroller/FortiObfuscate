@@ -24,6 +24,7 @@ str_repl_mstr = {}
 og_workspace = ""
 mod_workspace = ""
 opflags = []
+agg_fedwalk = False
 debug_mode = False
 
 # list of lists containing 2 items -> [file_path, combobox]
@@ -40,7 +41,7 @@ def importMap(filename):
 
     OG = ""
     for l in lines:
-        if '+---' in l:
+        if '>>>' in l:
             if 'IP' in l:
                 imp_ip = True
                 imp_mac = False
@@ -49,7 +50,7 @@ def importMap(filename):
                 imp_ip = False
                 imp_mac = True
                 imp_str = False
-            elif 'STRING' in l:
+            elif 'Strings' in l:
                 imp_ip = False
                 imp_mac = False
                 imp_str = True
@@ -62,26 +63,23 @@ def importMap(filename):
             continue
 
         if imp_ip:
-            components = l.split(':')
-            if ('Original' in components[0]):
-                OG = components[1].strip()
-            else:
-                ip_repl_mstr[OG] = components[1].strip()
-                OG = ""
+            components = l.split(' -> ')
+            try:
+                ip_repl_mstr[components[0]] = components[1]
+            except:
+                print(f"\nImproperly formatted line (or newline): {l}\n")
         elif imp_mac:
-            components = l.split(':')
-            if ('Original' in components[0]):
-                OG = components[1].strip()
-            else:
-                mac_repl_mstr[OG] = components[1]
-                OG = ""
+            components = l.split(' -> ')
+            try:
+                mac_repl_mstr[components[0]] = components[1]
+            except:
+                print(f"\nImproperly formatted line (or newline): {l}\n")
         elif imp_str:
-            components = l.split(':')
-            if ('Original' in components[0]):
-                OG = components[1].strip()
-            else:
-                str_repl_mstr[OG] = components[1].strip()
-                OG = ""
+            components = l.split(' -> ')
+            try:
+                str_repl_mstr[components[0]] = components[1]
+            except:
+                print(f"\nImproperly formatted line (or newline): {l}\n")
         
         else:
             print("Something went wrong, mappings might not be fully imported\n")
@@ -89,6 +87,8 @@ def importMap(filename):
                   IP Mapping: {ip_repl_mstr}\n\
                   MAC Address Mapping: {mac_repl_mstr}\n\
                   String Mapping: {str_repl_mstr}\n")
+    
+    set_repl_dicts()
 
 
 def buildDirTree(dir):
@@ -230,10 +230,11 @@ def toPCAPFormat(ip_repl_mstr=ip_repl_mstr, p_ip_repl=pcap.ip_repl, mac_repl_mst
             rep_reconstruct += bytes(r, 'utf-8')
         
         if og_reconstruct not in p_mac_repl.keys():
-            p_mac_repl[unhexlify(og_reconstruct)] = unhexlify(rep_reconstruct)
+            p_mac_repl[unhexlify(og_reconstruct)] = unhexlify(rep_reconstruct.strip())
     
     for og_str, rep_str in str_repl_mstr.items():
         if type(og_str) == str:
+            og_str = og_str.strip("b'\"")
             if bytes(og_str, 'utf-8') not in p_str_repl.keys():
                 p_str_repl[bytes(og_str, 'utf-8')] = rep_str
         else:
@@ -325,6 +326,7 @@ def fromPCAPFormat(ip_repl_mstr=ip_repl_mstr, p_ip_repl=pcap.ip_repl, mac_repl_m
             rep_str = rep_str.decode('ascii')
         
         if og_str not in str_repl_mstr.keys():
+            og_str = og_str.strip("b'\"")
             str_repl_mstr[og_str] = rep_str
 
 # Button Functions
@@ -340,7 +342,8 @@ Option Buttons:\n\
         'Preserve IPs' = Do not perform scrubbing of IPs\n\
         'Preserve Strings' = Do not perform scrubbing of strings (usernames, device names, etc)\n\
         'Scrub PCAP Payloads' = Scrubs the upper layer protocol payloads (some, not all)\n\
-        'Scrub Private IPs' = Replaces RFC-1918 IP addresses with a randomize /16 address\n\n\
+        'Scrub Private IPs' = Replaces RFC-1918 IP addresses with a randomize /16 address\n\
+        'Aggressive Replacement' = Enables fedwalk to utilize regex to replace ip address patterns\n\n\
 The Submit button will perform the associated obfuscation operations on the files listed based on the selection and\n\
 with respect to the arguments chosen\n\n\
 To turn on Debug (detailed logs) mode: press <F12> when on the main screen of the program"
@@ -378,6 +381,11 @@ def update_opflags(txt : str):
             opflags.remove('-sPIP')
         else:
             opflags.append('-sPIP')
+    elif "Aggressive Replacement" in txt:
+        if '-agg' in opflags:
+            opflags.remove('-agg')
+        else:
+            opflags.append('-agg')
 
 def update_args(button_txt : str, update_label : tk.Label):
     label_txt = update_label['text']
@@ -404,7 +412,6 @@ def set_repl_dicts(ip_repl_mstr=ip_repl_mstr, str_repl_mstr=str_repl_mstr, mac_r
     conf.ip_repl = ip_repl_mstr
     fedwalk.ip_repl = ip_repl_mstr
 
-    pcap.str_repl = str_repl_mstr
     log.str_repl = str_repl_mstr
     conf.str_repl = str_repl_mstr
     fedwalk.str_repl = str_repl_mstr
@@ -418,7 +425,6 @@ def append_mstr_dicts(ip_repl_mstr=ip_repl_mstr, str_repl_mstr=str_repl_mstr, ma
     ip_repl_mstr = log.ip_repl | ip_repl_mstr
     ip_repl_mstr = conf.ip_repl | ip_repl_mstr
     ip_repl_mstr = fedwalk.ip_repl | ip_repl_mstr
-    str_repl_mstr = pcap.str_repl | str_repl_mstr
     str_repl_mstr = log.str_repl | str_repl_mstr
     str_repl_mstr = conf.str_repl | str_repl_mstr
     str_repl_mstr = fedwalk.str_repl | str_repl_mstr
@@ -426,10 +432,7 @@ def append_mstr_dicts(ip_repl_mstr=ip_repl_mstr, str_repl_mstr=str_repl_mstr, ma
 
     fromPCAPFormat()
 
-def obf_on_submit(progress: ttk.Progressbar):
-
-    # In case a map is imported
-    set_repl_dicts()
+def obf_on_submit(progress: ttk.Progressbar):    
     
     debug_log = None
     global debug_mode
@@ -450,7 +453,7 @@ def obf_on_submit(progress: ttk.Progressbar):
             log.mainloop(opflags, path, modified_fp, debug_log)
             print(f"[SYSLOG] - {path} obfuscated and written to {modified_fp}")
         elif "pcap" in combo.get():
-            pcap.mainloop(opflags, path, modified_fp)
+            pcap.mainloop(opflags, path, modified_fp, debug_log)
             print(f"[PCAP] - {path} obfuscated and written to {modified_fp}")
         elif "fedwalk" in combo.get():
             save_fedwalk_for_last.append((path, modified_fp))
@@ -466,9 +469,24 @@ def obf_on_submit(progress: ttk.Progressbar):
         amount_of_files = len(save_fedwalk_for_last)
 
         for num, (src, dst) in enumerate(save_fedwalk_for_last):
-            fedwalk.mainloop(opflags, src, dst)
+            fedwalk.mainloop(opflags, src, dst, debug_log)
             print(f"[FEDWALK] - {path} obfuscated and written to {modified_fp}")
     
+    map_output = ""
+
+    map_output += "\nMaster Dictionaries:\n\n>>> IP Addresses\n"
+    for k,v in ip_repl_mstr.items():
+        map_output += f"{k} -> {v}\n"
+    map_output += "\n>>> MAC Addresses\n"
+    for k,v in mac_repl_mstr.items():
+        map_output += f"{k} -> {v}\n"
+    map_output += "\n>>> Strings\n"
+    for k,v in str_repl_mstr.items():
+        map_output += f"{k} -> {v}\n"
+
+    with open(f"mapof_{og_workspace}.txt", 'w') as mapfile_out:
+        mapfile_out.write(map_output)
+
     if debug_log:
         debug_log.close()
         debug_mode = False
@@ -479,7 +497,7 @@ options = {"-pi, --preserve-ips":"Program scrambles routable IP(v4&6) addresses 
 		   "-ps, --preserve-strings":"Disable sensitive string scramble",\
 			"-sPIP, --scramble-priv-ips":"Scramble private/non-routable IP addresses",\
 			"-sp, --scrub-payload":"Sanitize (some) payload in packet for pcaps",\
-			"-ns":"Non-standard ports used. By default pcapsrb.py assumes standard port usage, use this option if the pcap to be scrubbed uses non-standard ports. For more info on usage, run \'python pcapsrb.py -ns -h\'",\
+			"-ns":"Non-standard ports used. By default pcapsrb.py assumes standard port usage, use this option if the pcap to be scrubbed uses non-standard ports",\
 			"-map=<MAPFILE>":"Take a map file output from any FFI program and input it into this program to utilize the same replacements"}
 
 # Take in directory from the CLI
@@ -557,6 +575,8 @@ for x in opflags:
         cli_args += "\nScrub PCAP Payloads"
     elif '-sPIP' in x:
         cli_args += "\nScrub Private IPs"
+    elif '-agg' in x:
+        cli_args += "\nAggressive Replacement"
 
 current_selected_args = tk.Label(listargs, text=f"Arguments selected:{cli_args}", font=("San Francisco", 12))
 current_selected_args.pack()
@@ -575,9 +595,12 @@ scrubpayload_button.grid(column=0, row=1)
 scrubprivateIPs_button = ttk.Button(buttonarr, command=lambda : update_args("Scrub Private IPs", current_selected_args), text="Scrub Private IPs")
 scrubprivateIPs_button.grid(column=1, row=1)
 
+aggressiveReplacement_button = ttk.Button(buttonarr, command=lambda : update_args("Aggressive Replacement", current_selected_args), text="Aggressive Replacement (Experimental)")
+aggressiveReplacement_button.grid(column=0, row=2)
+
 allOps = ttk.Combobox(buttonarr, values=combox_options)
 
-allOps.grid(column=1, row=2)
+allOps.grid(column=1, row=3)
 
 help = ttk.Button(main_window, command=help, text="Help")
 help.grid(column=0, row=3)
@@ -598,14 +621,6 @@ files = getFiles(dirtree_of_workspace)
 for row, path in enumerate(files):
     inner = []
 
-    '''
-    next_label = ttk.Label(treeframe, justify="center", text=path)
-    next_comb = ttk.Combobox(comboframe, justify='center', values=combox_options)
-    
-    next_label.pack(anchor='w')
-    next_comb.pack(anchor='e')
-    '''
-
     nextFrame = tk.Frame(m_frame, height=25, width=750, padx=5, pady=3, bg="dark grey", bd=1, relief='raised')
     nextFrame.grid_propagate(0)
     nextFrame.grid(column=0, row=row)
@@ -620,13 +635,51 @@ for row, path in enumerate(files):
     fp_combox_mapping.append(inner)
 
 allButton = ttk.Button(buttonarr, text="All: ", command=lambda: allof(allOps, fp_combox_mapping))
-allButton.grid(column=0, row=2)
+allButton.grid(column=0, row=3)
 
 def debugSwitch(event):
     global debug_mode
     debug_mode = not debug_mode
     print(f"Debug mode mode set: {'ON' if debug_mode else 'OFF'}")
 
+def viewMap(event):
+
+    print("Master Dictionaries:\n\n>>> IP Addresses")
+
+    for k,v in ip_repl_mstr.items():
+        print(f"{k} -> {v}",end='')
+
+    print("\n>>> MAC Addresses")
+    for k,v in mac_repl_mstr.items():
+        print(f"{k} -> {v}",end='')
+
+    print("\n>>> Strings")
+    for k,v in str_repl_mstr.items():
+        print(f"{k} -> {v}", end='')
+    
+    print("\n")
+
+def viewPCAPMap(event):
+
+    print("PCAP Dictionaries (Binary Formatted):\n\n>>> IP Addresses")
+
+    for k,v in pcap.ip_repl.items():
+        print(f"{k} -> {v}")
+
+    print("\n>>> MAC Addresses")
+    for k,v in pcap.mac_repl.items():
+        print(f"{k} -> {v}",end='')
+
+    print("\n>>> Strings")
+    for k,v in pcap.str_repl.items():
+        print(f"{k} -> {v}", end='')
+    
+    print("\n")
+
 main_window.bind("<F12>", debugSwitch)
+
+main_window.bind("<F1>", viewMap)
+
+main_window.bind("<F2>", viewPCAPMap)
 
 main_window.mainloop()

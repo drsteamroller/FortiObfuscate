@@ -1,0 +1,101 @@
+
+Master Dictionaries:
+
+>>> IP Addresses
+10.0.0.1 -> 10.0.0.1
+10.0.0.100 -> 10.0.0.100
+192.168.1.98 -> 192.168.1.98
+10.255.1.1 -> 10.255.1.1
+96.45.45.45 -> 249.38.166.20
+96.45.46.46 -> 230.151.71.98
+10.255.1.2 -> 10.255.1.2
+10.255.1.254 -> 10.255.1.254
+192.168.1.110 -> 192.168.1.110
+0.0.0.0 -> 17.77.229.215
+10.212.134.200 -> 10.212.134.200
+10.212.134.210 -> 10.212.134.210
+10.0.0.0 -> 10.0.0.0
+192.168.1.99 -> 192.168.1.99
+192.168.2.0 -> 192.168.2.0
+173.243.128.0 -> 223.32.12.178
+239.255.255.255 -> 155.207.109.226
+224.0.0.1 -> 6.27.182.211
+224.0.0.2 -> 35.9.200.44
+224.0.0.251 -> 123.136.62.70
+224.0.0.10 -> 44.116.115.83
+224.0.0.5 -> 60.150.143.209
+224.0.0.6 -> 49.80.160.43
+fdff:ffff:: -> fe6d:eb57:a2c9:8e60:21b:f1cb:e352:bb9d
+:: -> ac53:4bd3:20d1:c629:ccc6:f8ed:288d:50db
+ff00:: -> 4a57:8b7e:3cbc:c22:c66a:35f9:fab4:3579
+80.254.145.118 -> 252.145.88.43
+192.168.2.2 -> 192.168.2.2
+10.0.0.226 -> 10.0.0.226
+10.0.0.227 -> 10.0.0.227
+10.0.0.230 -> 10.0.0.230
+192.168.2.3 -> 192.168.2.3
+192.168.2.4 -> 192.168.2.4
+192.168.2.5 -> 192.168.2.5
+192.168.2.10 -> 192.168.2.10
+192.168.2.11 -> 192.168.2.11
+10.0.0.240 -> 10.0.0.240
+192.168.2.6 -> 192.168.2.6
+192.168.0.1 -> 192.168.0.1
+8.8.8.8 -> 154.137.208.251
+fdff:ffff: -> fe6d:eb57:a2c9:8e60:21b:f1cb:e352:bb9d
+ -> ac53:4bd3:20d1:c629:ccc6:f8ed:288d:50db
+ff00: -> 4a57:8b7e:3cbc:c22:c66a:35f9:fab4:3579
+
+>>> MAC Addresses
+00:19:06:ea:b8:c0 -> 0a:66:58:f4:20:47
+00:1d:60:b3:01:84 -> 8f:91:13:b7:32:a8
+0a:66:58:f4:20:47 -> cd:a3:8f:10:a3:9f
+8f:91:13:b7:32:a8 -> 57:8f:8c:a7:ca:8f
+00:19:06:ea:b8:8c -> 57:1d:d0:d9:35:67
+00:14:22:e9:54:5e -> c1:7a:ce:68:74:18
+
+>>> Strings
+FortiGate-71F -> TguoMYzJTjJob
+root -> NYgD
+HomeRouter -> NAUNDqMZyt
+NUC for now -> eWMVBjhuRJE
+SSL VPN interface -> YXTdNlittxOGPDzca
+Default automation trigger configuration for when a network connection goes down. -> LBNAAumrhfIcznMCAGOluMBzJDVCbigwEgAeOZQkyniVOZocwyRtyCrjUoAkAVVQFisPvBljHBnVAmpAz
+Default automation trigger configuration for when an HA failover occurs. -> wKFpXHYdHbUzXqLMlgCJXPJkFkvDpcdyFMLLcPXVczGpUdgObjbPDYCXoiVvYFupXhqofYdi
+Default automation trigger configuration for when a FortiGate is rebooted. -> DPoGhmJLECrhSkqrjhCYcWvxiaIvUdftFVIFavxLMPTrAxglEKxcBYKMwkhhjOveXcTRNsjBJt
+Default automation trigger configuration for when the FortiAnalyzer connection is lost. -> sntncOdIcKIjITxlRNgGwNYAdLXtDqiRaikULJRnWRjirIILBrycWhIEksyyWjeFYSnRCSeSoQaaggIfahdhQTz
+Default automation trigger configuration for when a license is near expiration. -> TGgfBlXQqAdqishgJrMJJjnVlMmtTlRIVNHEQVeMEPxtgDhdCqflQLLxyHzuSSZCodKXgTBRTcBDxNe
+Default automation trigger configuration for when a high severity compromised host is detected. -> yGXrkQfcezgQUMvcmZNZSkHSLIURDapiTLCqJucHskhIHEFNoysAovzuqsFCZNFMRaKZaSXGGyxluECZpEnAOotsxtLoAGp
+Default automation trigger configuration for an incoming webhook. -> ggTSTrybHUaQQXSeFdbTnEGnQuMKmnwHHqcdYVmNRoQpxYhfPLmIRLCiJqizuJjlX
+Default automation trigger configuration for when a new Security Rating report is available. -> zKwmecISRMlvcecwAcNmsWOCsosVkiNxpfMxqmAVxuqrtKtMllmcqOLCoOLSoLEWyuYVhGAfYrOFAXUfmdXEOPcolOCQ
+Default automation action configuration for sending an email with basic information on the log event. -> GZOQsoPekPQBPqiMKkQmgAGLixbGlyOcacucIPVZFmtclpTyPxzvkTwbQXrqSzraNBhPrHQzUMzreDpfhOXEQNbgZmmFeDMJOYgyL
+Default automation action configuration for sending a notification to any FortiExplorer mobile application. -> GUZHVwuWaamYQcLPztIShZUKMJkBxXWsFrDiSawwrAMwtpSygSYlrDMBFcoycXEtEvfXWShDPMlxYYtAeEDdJRpbgDGkBSxXhwjPgRHqveD
+Default automation action configuration for quarantining a MAC address on FortiSwitches and FortiAPs. -> MRFkYcicPTXWSqrAdGxpZlUMcYmiTwGZjAUvdbQYBndvUqFkAwVflHWAMpbnJEiwbjqnBTouYjUzdyVzwXjpxqjMMvvPamoQYoqFY
+Default automation action configuration for quarantining a FortiClient EMS endpoing device. -> hIkQXsHGwhQSAtrOKFFntLAdtHnfenHkAiEXTvIGOiLOJfYnAxfIRRpRnksdGITRBGTJpmusBwLjIKCTZnquFcRMzeq
+Default automation stitch to send an email when a network goes down. -> agHDgIVKdXQJUAelMKqllVDduZSIUDZQUzfNBrwdDrzQVSIucyUowzGxoaROSFShnVuW
+Default automation stitch to send an email when a HA failover is detected. -> hmIsHEBcfwzRqTljuFakdZbxtQiSPeIpiwGXqmJjQDspQtUowOjcgVyTjcPSIBibMadxvPPIjw
+Default automation stitch to send an email when a FortiGate is rebooted. -> URCiDjVgDfmDsUBbcJCLAcbdlekxxShIUiMDkloxvAHCMWVNOPqTzMaCpDueeGcnAclwvslL
+Default automation stitch to send a FortiExplorer notification when the connection to FortiAnalyzer is lost. -> oXPnpmWRIOIrJsghFQetHsfXbQmVjPyqcbCrZCVcVcVBkerUBnkpyNyMwMSkgpjBzjElGcYFOSARvQSXnmQOvzNHOURRvikBsQnZUBjWbQQO
+Default automation stitch to send a FortiExplorer notification when a license is near expiration. -> MNBmJHbwCUoPGYtBWJzgkkXufjCBhgNMFMYpUVqbAjLAjEVDtpXmfhbJOfanCxCnPyhiEGPqKGlZxrgwdCcpwJydYSrPKKPVl
+Default automation stitch to quarantine a high severity compromised host on FortiAPs, FortiSwitches, and FortiClient EMS. -> eibqifShRIWMxISFGInWSSSUyXQTznWQcVofiFGSXKsoMoNytXyfLaUZCcckIJosUwAWDJFvKlAgwzElqZoBeSBZUcLumqoxjtyWzHXTMSwwYtTQsNCwGZopD
+Default automation stitch to quarantine a provided MAC address on FortiAPs, FortiSwitches, and FortiClient EMS using an Incoming Webhook. -> ueyafZtFYDfAkkIiNQehZEYWCaGUrBJNeCCbPXinDHQZdWviuFVRgoFPpxrXZOLPjPMmxapainKonMCINdPKGJLFHeqPjurfxkjMfHUTLuGQrYWaLMKHkhVyaXuZHDftngNwgYEUA
+Default automation stitch to send a FortiExplorer notification when a new Security Rating report is available. -> BHDnzNNuAsSHaGOiCtoUFLWJDioWtgLCLHjupkVTzwYefRCJMVpxJAoVZhGYBTutOxHusuBFnAkOEHPomkvinzIXRtoVpMbCciENSaKqMxrCze
+Rate control for quarantined traffic -> oswdtMCSwNnzxfPLhXPayUAPlXaDIDrCHVoH
+Rate control for sniffer mirrored traffic -> GYoRljhGsbtTDbeLAdXzCacgmUXfQTfTbAzpFJSOa
+NUC lab -> vShIeEk
+.*\\.google\\..* -> FKvmQTiqYKYcHAyq
+.*\\.yahoo\\..* -> OIYgpOSPgZLTYFu
+.*\\.bing\\..* -> QGHxgBBDmIAqXK
+yandex\\..* -> tUHiJOenPcF
+.*youtube.* -> SzYVxyyZPij
+.*\\.baidu\\.com -> rkqtgdDiEfmDamPG
+tieba\\.baidu\\.com -> vqhelsFvUQcIUoFXbRZ
+.*vimeo.* -> MTmdhNTcf
+twitter\\.com -> kOmkMMyeKCBwI
+translate\\.google\\..* -> qIvymCbnOYTKHuxLCoUzzDQ
+.*\\.translate\\.goog -> AoZJwvyAsccObwtVERcMo
+default storm control on all port -> KqjxrkvCpsVQtjtiLZCdnqVgayzkWDCSj
+storm control policy for fortilink-isl-icl port -> WjPHVCtsHSoZeqeHotIiyugDxTctRozdZhTZVSFcRZWPkgE
+SUPER_CRITICAL_GUY -> "jObhlZDlOZnYNChjwB"
+NUC la -> vShIeEk
+John.McGuirk -> bAfYNZmrPNiU

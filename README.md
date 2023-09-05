@@ -29,3 +29,7 @@ This is best explained with what each menu option does
 config, syslog, pcap: These sub-programs depend on standardized context to grab (specifically) string values. Fields in syslog-formatted files can include user=<username>, devid=1234, etc. This makes the string values easier to grab and replace
 
 fedwalk: this program specifically only looks for ip address patterns, and will replace any strings that have been cached by the previously mentioned programs. If you are only using 'fedwalk' on all your files, it will not replace any sensitive string values.
+
+
+@TODO
+- ID and fix PCAP byte conversion when strings are found before pcap scrubbing

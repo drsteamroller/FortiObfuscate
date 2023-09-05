@@ -20,6 +20,7 @@ from binaryornot.check import is_binary
 # GLOBAL VARS
 
 opflags = []
+debug_mes = ""
 depth = 0
 
 str_repl = dict()
@@ -252,7 +253,7 @@ def getFiles(dirTree):
 	
 	return files
 
-def modifyTxtFile(txtfile):
+def modifyTxtFile(txtfile, debug_log: str):
 	if type(txtfile) != list:
 		return txtfile
 
@@ -270,6 +271,7 @@ def modifyTxtFile(txtfile):
 			# actually replace
 			for ip in ipsearch:
 				line = line.replace(ip, replace_ip4(ip))
+				debug_log += f"[FEDWALK_txt] \\ipv4 address\\ identified and replaced:\n\t{ip} -> {replace_ip4(ip)}\n"
 		
 		ip6search = ip6.findall(line)
 		
@@ -282,18 +284,20 @@ def modifyTxtFile(txtfile):
 
 			for i6 in ip6search:
 				line = line.replace(i6, replace_ip6(i6))
+				debug_log += f"[FEDWALK_txt] \\ipv6 address\\ identified and replaced:\n\t{i6} -> {replace_ip6(i6)}\n"
 
 		for k, v in str_repl.items():
 			strsearch = re.findall(k, line)
 			if strsearch:
 				for ss in strsearch:
 					line = line.replace(ss, replace_str(ss))
+					debug_log += f"[FEDWALK_txt] \\string\\ identified and replaced:\n\t{ss} -> {replace_str(ss)}\n"
 		
 		txtfile[i] = line
 
 	return txtfile
 
-def modifyBinFile(binfile):
+def modifyBinFile(binfile, debug_log):
 	if type(binfile) != list:
 		return binfile
 
@@ -311,6 +315,8 @@ def modifyBinFile(binfile):
 			strrep = str(bip)[2:-1]
 			repl = bytes(replace_ip4(strrep), 'utf-8')
 			line = line.replace(bip, repl)
+			debug_log += f"[FEDWALK_bin] \\ipv4 address\\ identified and replaced:\n\t{bip[2:-1]} -> {repl[2:-1]}\n"
+
 		
 		binfile[i] = line
 
@@ -392,9 +398,10 @@ options = {"-h": "Display this output",\
 		   "-st=<stringfile>:":"Import a file containing strings you wish to replace (csv or newline separated values)",\
 		   "-map=<mapfilename>":"Import IP/MAC/String mappings from other FFI program output"}
 
-def mainloop(args: list, src_path: str, dst_path: str):
+def mainloop(args: list, src_path: str, dst_path: str, debug_log: __file__):
 
 	global opflags
+	global debug_mes
 	opflags = args
 
 	contents = None
@@ -412,10 +419,14 @@ def mainloop(args: list, src_path: str, dst_path: str):
 		contents = rf.readlines()
 
 	if r_mode == 'rb':
-		contents = modifyBinFile(contents)
+		contents = modifyBinFile(contents, debug_mes)
 	
 	else:
-		contents = modifyTxtFile(contents)
+		contents = modifyTxtFile(contents, debug_mes)
 	
 	with open(dst_path, w_mode) as wf:
 		wf.writelines(contents)
+
+	if debug_log:
+		debug_log.write(debug_mes + "\n\n")
+		debug_mes = ""

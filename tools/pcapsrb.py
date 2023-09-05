@@ -286,7 +286,6 @@ def scrub_upper_prots(pkt, sport, dport):
 			attrlist.append([t,d])
 
 		for off, [t, d] in enumerate(attrlist):
-			print(f"Before: {d}")
 			if t == dpkt.radius.RADIUS_USER_NAME:
 				d = bytes(replace_str(d), 'utf-8')
 			
@@ -349,7 +348,7 @@ def scrub_upper_prots(pkt, sport, dport):
 					
 					# replace, but also convert back to a hex string so we can properly swap back to a byte string
 					replaced = str(binascii.hexlify(replace_ip(binascii.unhexlify(hexrep))))[2:-1]
-					
+
 					r = ""
 					for w in range(0, len(replaced), 2):
 						r += str(int(replaced[w]+replaced[w+1], 16)) + '.'
@@ -383,8 +382,8 @@ def scrub_upper_prots(pkt, sport, dport):
 						hexrep += h
 				
 				# replace, but also convert back to a hex string so we can properly swap back to a byte string
-				replaced = str(binascii.hexlify(replace_ip(binascii.unhexlify(hexrep))))[2:-1]
-				
+				replaced = str(binascii.hexlify(replace_ip(binascii.unhexlify(hexrep))))[2:-1]				
+
 				r = ""
 				for w in range(0, len(replaced), 2):
 					r += str(int(replaced[w]+replaced[w+1], 16)) + '.'
