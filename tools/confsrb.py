@@ -4,6 +4,7 @@
 
 import re
 import random
+import time
 
 # Global Variables
 contents = []
@@ -145,12 +146,20 @@ def replace_ip6(ip):
     else:
         return ip
 
+def salt():
+    t = int( time.time() * 1000.0 )
+    random.seed( ((t & 0xff000000) >> 24) +
+             ((t & 0x00ff0000) >>  8) +
+             ((t & 0x0000ff00) <<  8) +
+             ((t & 0x000000ff) << 24))
+    return random.randint(2,8)
+
 def replace_str(s):
     if s in str_repl.keys():
         return str_repl[s]
 
     repl = ""
-    for ch in s:
+    for ch in range(len(s) + salt()):
         c = 0
         if (random.random() > .5):
             c = chr(random.randint(65,90))
@@ -236,7 +245,9 @@ def obfuscate(conf):
     for i, content in enumerate(conf):
 
         # Record the number of leading spaces, so we aren't having awkward lines that aren't in-line
-        leading = " " * re.search('\S', content).start()
+        leading = ""
+        if re.search('\S', content):
+            leading = " " * re.search('\S', content).start()
         
         # If we see certain values containing potentially sensitive strings, replace them
         if ("set hostname" in content or "set alias" in content or "description" in content or 'set vdom' in content):
