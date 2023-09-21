@@ -31,6 +31,11 @@ debug_mode = False
 fp_combox_mapping = []
 
 def importMap(filename):
+    """
+    Import mapping to populate str/ip/mac_repl_mstr dictionaries (usually from a previous run of this program)\\
+    Params: 
+    filename : str of filename, which is opened and read by the function
+    """
     lines = []
     with open(filename, 'r') as o:
         lines = o.readlines()
@@ -39,7 +44,6 @@ def importMap(filename):
     imp_mac = False
     imp_str = False
 
-    OG = ""
     for l in lines:
         if '>>>' in l:
             if 'IP' in l:
@@ -58,7 +62,8 @@ def importMap(filename):
                 print("Map file is improperly formatted, do not make changes to the map file unless you know what you are doing")
                 sys.exit(1)
             continue
-
+        
+        # Skip this line if it is empty
         if not len(l):
             continue
 
@@ -88,10 +93,16 @@ def importMap(filename):
                   MAC Address Mapping: {mac_repl_mstr}\n\
                   String Mapping: {str_repl_mstr}\n")
     
+    # Finally, we merge these imports with the subroutine replacement dictionaries
     set_repl_dicts()
 
 
 def buildDirTree(dir):
+    """
+    Stages a target directory and gives us a clean pointer to the top level dir for the next function\\
+    Params:
+    dir : string of the TLD, which is parsed by os.walk
+    """
     mod_dir = f"{dir}_obfuscated"
 
     mtd = mod_dir
@@ -119,6 +130,14 @@ def buildDirTree(dir):
     return (mtd, dirTree)
 
 def getFiles(dirTree):
+    """
+    Takes the dirTree list of the buildDirTree function and siphons out the files, which we will then use to obfuscate\\
+    Params:
+    dirTree: os.walk list of directories and files in the top level directory supplied
+
+    Returns:
+    list of files in all directories inside the TLD including the top level directory
+    """
     slash = '/'
 
     files = []
@@ -167,6 +186,10 @@ def abbrevIP6(ip6):
 
 # mstr -> pcap ("x.x.x.x" -> 0xhhhhhhhh)
 def toPCAPFormat(ip_repl_mstr=ip_repl_mstr, p_ip_repl=pcap.ip_repl, mac_repl_mstr=mac_repl_mstr, p_mac_repl=pcap.mac_repl, str_repl_mstr=str_repl_mstr, p_str_repl=pcap.str_repl):
+    """
+    Helper function to convert master dictionaries to pcap dictionaries, since pcap dictionaries\\
+    are hex-based, whereas master and config/syslog/fedwalk dictionaries are text/ascii based
+    """
     for og_ip, rep_ip in ip_repl_mstr.items():
 
         if ':' in og_ip:
@@ -243,7 +266,9 @@ def toPCAPFormat(ip_repl_mstr=ip_repl_mstr, p_ip_repl=pcap.ip_repl, mac_repl_mst
 
 # pcap -> mstr (0xhhhhhhhh -> "x.x.x.x")
 def fromPCAPFormat(ip_repl_mstr=ip_repl_mstr, p_ip_repl=pcap.ip_repl, mac_repl_mstr=mac_repl_mstr, p_mac_repl=pcap.mac_repl, str_repl_mstr=str_repl_mstr, p_str_repl=pcap.str_repl):
-    
+    """
+    Helper function to convert pcap dictionaries to master dictionaries (hex -> ascii)
+    """
     for og_ip, rep_ip in p_ip_repl.items():
         if type(og_ip) == bytes or type(og_ip) == bytearray:
             og_ip = str(hexlify(og_ip))[2:-1]
@@ -330,8 +355,10 @@ def fromPCAPFormat(ip_repl_mstr=ip_repl_mstr, p_ip_repl=pcap.ip_repl, mac_repl_m
             str_repl_mstr[og_str] = rep_str
 
 # Button Functions
-# GUI-based help output explaining what each combobox option is and what it does, and debug based help
 def help():
+    """
+    Creates the Help window when the Help button is pressed
+    """
     message_txt = "Explanation of the menu items:\n\
         'config' = select this if the associated file is a Fortinet configuration file\n\
         'syslog' = select this if the associated file is a syslog file (best if directly from FortiAnalyzer)\n\
@@ -361,6 +388,9 @@ To turn on Debug (detailed logs) mode: press <F12> when on the main screen of th
     helpPopupWin.mainloop()
 
 def update_opflags(txt : str):
+    """
+    Add or remove certain options based on buttons pressed on the GUI
+    """
     if "Preserve IP" in txt:
         if '-pi' in opflags:
             opflags.remove('-pi')
@@ -388,6 +418,9 @@ def update_opflags(txt : str):
             opflags.append('-agg')
 
 def update_args(button_txt : str, update_label : tk.Label):
+    """
+    Updates the visual list of options selected when an option button is pressed
+    """
     label_txt = update_label['text']
     bt = f"\n{button_txt}"
 
@@ -401,6 +434,9 @@ def update_args(button_txt : str, update_label : tk.Label):
     update_label['text'] = label_txt
 
 def allof(all : ttk.Combobox, allcbx : list[str, ttk.Combobox]):
+    """
+    Function of the 'All: ' button, sets all comboboxes to chosen option
+    """
     option = all.get()
 
     for [path, combox] in allcbx:
@@ -408,6 +444,9 @@ def allof(all : ttk.Combobox, allcbx : list[str, ttk.Combobox]):
 
 # For when a map is imported
 def set_repl_dicts(ip_repl_mstr=ip_repl_mstr, str_repl_mstr=str_repl_mstr, mac_repl_mstr=mac_repl_mstr):
+    """
+    Set the individual program replacement dictionaries to the master dictionaries
+    """
     log.ip_repl = ip_repl_mstr
     conf.ip_repl = ip_repl_mstr
     fedwalk.ip_repl = ip_repl_mstr
@@ -422,6 +461,10 @@ def set_repl_dicts(ip_repl_mstr=ip_repl_mstr, str_repl_mstr=str_repl_mstr, mac_r
 
 # Grabs the replacement dicts from the sub-programs and appends them to the mstr dicts
 def append_mstr_dicts(ip_repl_mstr=ip_repl_mstr, str_repl_mstr=str_repl_mstr, mac_repl_mstr=mac_repl_mstr):
+    """
+    Append new findings to our master dictionaries from the individual program dictionaries\\
+    This is done after the obfuscation function is performed on a file
+    """
     ip_repl_mstr = log.ip_repl | ip_repl_mstr
     ip_repl_mstr = conf.ip_repl | ip_repl_mstr
     ip_repl_mstr = fedwalk.ip_repl | ip_repl_mstr
@@ -433,7 +476,10 @@ def append_mstr_dicts(ip_repl_mstr=ip_repl_mstr, str_repl_mstr=str_repl_mstr, ma
     fromPCAPFormat()
 
 def obf_on_submit(progress: ttk.Progressbar):    
-    
+    """
+    Main function of the program, takes the list of files from the TLD and walks through them,\\
+    performing a corresponding obfuscation based on their mapped combobox option
+    """
     debug_log = None
     global debug_mode
 

@@ -58,9 +58,9 @@ def isNetMask(ip):
     for item in _:
         ip_list.append(int(item))
 
-    # Return false for quad 0 case (default routes)
+    # Return true for quad 0 case (default routes)
     if (ip_list == [0,0,0,0]):
-        return False
+        return True
 
     # Netmasks ALWAYS start with 1's
     expect_0 = False
