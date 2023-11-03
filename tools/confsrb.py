@@ -284,21 +284,25 @@ def obfuscate(conf):
                         g[2] = g[2][1:-1]
 
                     ip_o = content[a[0]:a[1]]
-                    ip_r = replace_ip4(content[a[0]:a[1]])
-                    g[2] = ip_r
+                    ip_r = replace_ip4(ip_o)
+                    g[2] = g[2].replace(ip_o, ip_r)
                     
                 elif (len(g) > 3):
                     for b, ip in enumerate(g[2:]):
                         if is_ip4.search(ip):
                             ip_o = g[b + 2]
-                            ip_r = g[b + 2] = replace_ip4(ip)
+                            ip_r = g[b + 2] = replace_ip4(ip_o)
+                
+                elif (len(g) == 2):
+                    a = is_ip4.search(g[1]).group()
+                    g[1] = g[1].replace(a, replace_ip4(a))
                 leading += " ".join(g)
             except IndexError:
-                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i+1}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i+1}: \"{content}\"\n"
             else:
-                debug_mes += f"[CONF] \\IPv4 address REGEX encountered\\ statement enountered and replaced at line #{i}\n\t{ip_o}  ->  {ip_r}\n"
+                debug_mes += f"[CONF] \\IPv4 address REGEX encountered\\ statement enountered and replaced at line #{i+1}\n\t{ip_o}  ->  {ip_r}\n"
                 content = leading + "\n"
 
         elif (is_ip6.search(content)):

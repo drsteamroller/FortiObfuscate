@@ -445,45 +445,89 @@ def allof(all : ttk.Combobox, allcbx : list[str, ttk.Combobox]):
         combox.set(option)
 
 # For when a map is imported
-def set_repl_dicts(ip_repl_mstr=ip_repl_mstr, str_repl_mstr=str_repl_mstr, mac_repl_mstr=mac_repl_mstr):
+def set_repl_dicts():
     """
     Set the individual program replacement dictionaries to the master dictionaries
     """
-    log.ip_repl = ip_repl_mstr
-    conf.ip_repl = ip_repl_mstr
-    fedwalk.ip_repl = ip_repl_mstr
 
-    log.str_repl = str_repl_mstr
-    conf.str_repl = str_repl_mstr
-    fedwalk.str_repl = str_repl_mstr
+    global ip_repl_mstr
+    global mac_repl_mstr
+    global str_repl_mstr
 
-    fedwalk.mac_repl = mac_repl_mstr
+    log.ip_repl |= ip_repl_mstr
+    conf.ip_repl |= ip_repl_mstr
+    fedwalk.ip_repl |= ip_repl_mstr
+
+    log.str_repl |= str_repl_mstr
+    conf.str_repl |= str_repl_mstr
+    fedwalk.str_repl |= str_repl_mstr
+
+    fedwalk.mac_repl |= mac_repl_mstr
 
     toPCAPFormat()
 
 # Grabs the replacement dicts from the sub-programs and appends them to the mstr dicts
-def append_mstr_dicts(ip_repl_mstr=ip_repl_mstr, str_repl_mstr=str_repl_mstr, mac_repl_mstr=mac_repl_mstr):
+def append_mstr_dicts():
     """
     Append new findings to our master dictionaries from the individual program dictionaries\\
     This is done after the obfuscation function is performed on a file
     """
-    ip_repl_mstr = log.ip_repl | ip_repl_mstr
-    ip_repl_mstr = conf.ip_repl | ip_repl_mstr
-    ip_repl_mstr = fedwalk.ip_repl | ip_repl_mstr
-    str_repl_mstr = log.str_repl | str_repl_mstr
-    str_repl_mstr = conf.str_repl | str_repl_mstr
-    str_repl_mstr = fedwalk.str_repl | str_repl_mstr
-    mac_repl_mstr = fedwalk.mac_repl | mac_repl_mstr
+
+    global ip_repl_mstr
+    global mac_repl_mstr
+    global str_repl_mstr
+
+    if log.ip_repl:
+        ip_repl_mstr = ip_repl_mstr | log.ip_repl
+    if conf.ip_repl:
+        ip_repl_mstr = ip_repl_mstr | conf.ip_repl
+    if fedwalk.ip_repl:
+        ip_repl_mstr = ip_repl_mstr | fedwalk.ip_repl
+    if log.str_repl:
+        str_repl_mstr = str_repl_mstr | log.str_repl
+    if conf.str_repl:
+        str_repl_mstr = str_repl_mstr | conf.str_repl
+    if fedwalk.str_repl:
+        str_repl_mstr = str_repl_mstr | fedwalk.str_repl
+    if fedwalk.mac_repl:
+        mac_repl_mstr = mac_repl_mstr | fedwalk.mac_repl
 
     fromPCAPFormat()
 
-def obf_on_submit(progress: ttk.Progressbar):    
+def print_mstr_dicts():
+
+    print("IP replacement master dict")
+    print(ip_repl_mstr)
+    print("STR replacement master dict")
+    print(str_repl_mstr)
+    print("MAC replacement master dict")
+    print(mac_repl_mstr)
+
+def print_child_proc_dicts():
+
+    print("Order is always: conf, syslog, pcap, fedwalk")
+    print("IP replacement child dicts")
+    print(conf.ip_repl)
+    print(log.ip_repl)
+    print(pcap.ip_repl)
+    print(fedwalk.ip_repl)
+    print("STR replacement child dicts")
+    print(conf.str_repl)
+    print(log.str_repl)
+    print(pcap.str_repl)
+    print(fedwalk.str_repl)
+
+def obf_on_submit(progress: ttk.Progressbar):
     """
     Main function of the program, takes the list of files from the TLD and walks through them,\\
     performing a corresponding obfuscation based on their mapped combobox option
     """
     debug_log = None
     global debug_mode
+    global agg_fedwalk
+    global ip_repl_mstr
+    global mac_repl_mstr
+    global str_repl_mstr
 
     if debug_mode:
         debug_log = open("fortiobfuscate_debug.log", 'w')
@@ -501,18 +545,18 @@ def obf_on_submit(progress: ttk.Progressbar):
         if "config" in combo.get():
             conf.mainLoop(opflags, path, modified_fp, debug_log)
             if agg_fedwalk:
-                aggressive_fedwalk.append(path)
+                aggressive_fedwalk.append(modified_fp)
                 
             print(f"[CONFIG] - {path} obfuscated and written to {modified_fp}")
         elif "syslog" in combo.get():
             log.mainloop(opflags, path, modified_fp, debug_log)
             if agg_fedwalk:
-                aggressive_fedwalk.append(path)
+                aggressive_fedwalk.append(modified_fp)
             print(f"[SYSLOG] - {path} obfuscated and written to {modified_fp}")
         elif "pcap" in combo.get():
             pcap.mainloop(opflags, path, modified_fp, debug_log)
             if agg_fedwalk:
-                aggressive_fedwalk.append(path)
+                aggressive_fedwalk.append(modified_fp)
             print(f"[PCAP] - {path} obfuscated and written to {modified_fp}")
         elif "fedwalk" in combo.get():
             save_fedwalk_for_last.append((path, modified_fp))
@@ -521,21 +565,24 @@ def obf_on_submit(progress: ttk.Progressbar):
 
         progress['value'] = ((num+1)/amount_of_files)*100
 
-        print(aggressive_fedwalk)
         append_mstr_dicts()
         set_repl_dicts()
 
-    if len(save_fedwalk_for_last) > 0:
-        amount_of_files = len(save_fedwalk_for_last)
+        print_mstr_dicts()
+        print_child_proc_dicts()
 
-        for num, (src, dst) in enumerate(save_fedwalk_for_last):
-            fedwalk.mainloop(opflags, src, dst, debug_log)
-            print(f"[FEDWALK] - {src} obfuscated and written to {dst}")
+    for num, (src, dst) in enumerate(save_fedwalk_for_last):
+        fedwalk.mainloop(opflags, src, dst, debug_log)
+        print(f"[FEDWALK] - {src} obfuscated and written to {dst}")
     
-    if len(aggressive_fedwalk) > 0:
-        for src in aggressive_fedwalk:
-            fedwalk.mainloop(opflags, src, src, debug_log)
-            print(f"[FEDWALK] - Additional pass through on {src}, overwritten in place")
+    for src in aggressive_fedwalk:
+
+        set_repl_dicts()
+        print_mstr_dicts()
+        print_child_proc_dicts()
+
+        fedwalk.mainloop(opflags, src, src, debug_log)
+        print(f"[FEDWALK] - Additional pass through on {src}, overwritten in place")
     
     map_output = ""
 
