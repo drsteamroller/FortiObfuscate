@@ -174,20 +174,8 @@ def replace_ip6(ip):
 def replace_str(s):
 	if s in str_repl.keys():
 		return str_repl[s]
-
-	repl = ""
-	for ch in s:
-		c = 0
-		if (random.random() > .5):
-			c = chr(random.randint(65,90))
-		else:
-			c = chr(random.randint(97, 122))
-
-		repl += c
-
-	str_repl[s] = repl
-
-	return repl
+	
+	return s
 
 def repl_dicts_to_logfile(filename):
 	with open(filename, 'w') as outfile:
@@ -286,6 +274,7 @@ def modifyTxtFile(txtfile, debug_log: str):
 				line = line.replace(i6, replace_ip6(i6))
 				debug_log += f"[FEDWALK_txt] \\ipv6 address\\ identified and replaced:\n\t{i6} -> {replace_ip6(i6)}\n"
 
+		
 		for k, v in str_repl.items():
 			strsearch = re.findall(k, line)
 			if strsearch:

@@ -285,7 +285,7 @@ def obfuscate(conf):
 
                     ip_o = content[a[0]:a[1]]
                     ip_r = replace_ip4(content[a[0]:a[1]])
-                    g[2] = content[:a[0]] + ip_r + content[a[1]:]
+                    g[2] = ip_r
                     
                 elif (len(g) > 3):
                     for b, ip in enumerate(g[2:]):

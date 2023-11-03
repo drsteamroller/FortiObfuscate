@@ -370,7 +370,7 @@ Option Buttons:\n\
         'Preserve Strings' = Do not perform scrubbing of strings (usernames, device names, etc)\n\
         'Scrub PCAP Payloads' = Scrubs the upper layer protocol payloads (some, not all)\n\
         'Scrub Private IPs' = Replaces RFC-1918 IP addresses with a randomize /16 address\n\
-        'Aggressive Replacement' = Enables fedwalk to utilize regex to replace ip address patterns\n\n\
+        'Aggressive Replacement' = Enables fedwalk to do a second runthrough of all 'conf', 'syslog', and 'pcap' selected files\n\n\
 The Submit button will perform the associated obfuscation operations on the files listed based on the selection and\n\
 with respect to the arguments chosen\n\n\
 To turn on Debug (detailed logs) mode: press <F12> when on the main screen of the program"
@@ -433,6 +433,8 @@ def update_args(button_txt : str, update_label : tk.Label):
     update_opflags(button_txt)
     update_label['text'] = label_txt
 
+    print(opflags)
+
 def allof(all : ttk.Combobox, allcbx : list[str, ttk.Combobox]):
     """
     Function of the 'All: ' button, sets all comboboxes to chosen option
@@ -485,8 +487,12 @@ def obf_on_submit(progress: ttk.Progressbar):
 
     if debug_mode:
         debug_log = open("fortiobfuscate_debug.log", 'w')
+    
+    if '-agg' in opflags:
+        agg_fedwalk = True
 
     save_fedwalk_for_last = []
+    aggressive_fedwalk = []
     amount_of_files = len(fp_combox_mapping)
 
     for num, [path, combo] in enumerate(fp_combox_mapping):
@@ -494,12 +500,19 @@ def obf_on_submit(progress: ttk.Progressbar):
 
         if "config" in combo.get():
             conf.mainLoop(opflags, path, modified_fp, debug_log)
+            if agg_fedwalk:
+                aggressive_fedwalk.append(path)
+                
             print(f"[CONFIG] - {path} obfuscated and written to {modified_fp}")
         elif "syslog" in combo.get():
             log.mainloop(opflags, path, modified_fp, debug_log)
+            if agg_fedwalk:
+                aggressive_fedwalk.append(path)
             print(f"[SYSLOG] - {path} obfuscated and written to {modified_fp}")
         elif "pcap" in combo.get():
             pcap.mainloop(opflags, path, modified_fp, debug_log)
+            if agg_fedwalk:
+                aggressive_fedwalk.append(path)
             print(f"[PCAP] - {path} obfuscated and written to {modified_fp}")
         elif "fedwalk" in combo.get():
             save_fedwalk_for_last.append((path, modified_fp))
@@ -508,6 +521,7 @@ def obf_on_submit(progress: ttk.Progressbar):
 
         progress['value'] = ((num+1)/amount_of_files)*100
 
+        print(aggressive_fedwalk)
         append_mstr_dicts()
         set_repl_dicts()
 
@@ -516,7 +530,12 @@ def obf_on_submit(progress: ttk.Progressbar):
 
         for num, (src, dst) in enumerate(save_fedwalk_for_last):
             fedwalk.mainloop(opflags, src, dst, debug_log)
-            print(f"[FEDWALK] - {path} obfuscated and written to {modified_fp}")
+            print(f"[FEDWALK] - {src} obfuscated and written to {dst}")
+    
+    if len(aggressive_fedwalk) > 0:
+        for src in aggressive_fedwalk:
+            fedwalk.mainloop(opflags, src, src, debug_log)
+            print(f"[FEDWALK] - Additional pass through on {src}, overwritten in place")
     
     map_output = ""
 
