@@ -104,7 +104,11 @@ def isNetMask(ip):
 	_ = ip.split('.')
 	ip_list = list()
 	for item in _:
-		ip_list.append(int(item))
+		try:
+			ip_list.append(int(item))
+		except ValueError as e:
+			print(f"[FEDWALK] Error interpreting IP: {ip}, continuing")
+			return True # Return true to not mess with IP (or falsely flagged IP)
 
 	# Return false for quad 0 case (default routes)
 	if (ip_list == [0,0,0,0]):
@@ -140,7 +144,23 @@ def replace_ip4(ip):
 	if (ip in ip_repl.keys()):
 		return ip_repl[ip]
 	
-	return ip
+	if (isNetMask(ip)):
+		return ip
+	if (ip not in ip_repl.keys()):
+		repl = ""
+		if (isRFC1918(ip) and "-sPIP" in opflags and "-pi" not in opflags):
+			octets = ip.split('.')
+			repl = f"{octets[0]}.{octets[1]}.{random.randrange(0, 256)}.{random.randrange(1, 256)}"
+		elif (not isRFC1918(ip) and "-pi" not in opflags):
+			repl = f"{random.randrange(1, 255)}.{random.randrange(0, 255)}.{random.randrange(0, 255)}.{random.randrange(1, 255)}"
+		else:
+			repl = ip
+		ip_repl[ip] = repl
+		return repl
+	
+	# If we've replaced it before, pick out that replacement and return it
+	else:
+		return ip_repl[ip]
 
 def replace_ip6(ip):
 
@@ -233,14 +253,12 @@ def modifyTxtFile(txtfile, debug_log: str):
 	for i, line in enumerate(txtfile):
 		
 		for k in ip_repl.keys():
-			print(k)
 			ipsearch = re.findall(k, line)
 			if ipsearch:
-				print(ipsearch)
 				for ip in ipsearch:
 					line = line.replace(ip, replace_ip4(ip))
 					debug_log += f"[FEDWALK_txt] \\ipv4\\ identified and replaced:\n\t{ip} -> {replace_ip4(ip)}\n"
-		'''
+		
 		ipsearch = ip4.findall(line)
 		
 		if ipsearch:
@@ -254,7 +272,7 @@ def modifyTxtFile(txtfile, debug_log: str):
 			for ip in ipsearch:
 				line = line.replace(ip, replace_ip4(ip))
 				debug_log += f"[FEDWALK_txt] \\ipv4 address\\ identified and replaced:\n\t{ip} -> {replace_ip4(ip)}\n"
-		'''
+		
 
 		ip6search = ip6.findall(line)
 		
@@ -278,8 +296,6 @@ def modifyTxtFile(txtfile, debug_log: str):
 					debug_log += f"[FEDWALK_txt] \\string\\ identified and replaced:\n\t{ss} -> {replace_str(ss)}\n"
 		
 		txtfile[i] = line
-
-	print(debug_log)
 
 	return txtfile
 
@@ -389,9 +405,7 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log: __file__):
 	global opflags
 	global debug_mes
 	opflags = args
-
-	print(ip_repl)
-
+	
 	contents = None
 	r_mode = ''
 	w_mode = ''
@@ -415,7 +429,6 @@ def mainloop(args: list, src_path: str, dst_path: str, debug_log: __file__):
 	with open(dst_path, w_mode) as wf:
 		wf.writelines(contents)
 
-	print(debug_mes)
 	if debug_log:
 		debug_log.write(debug_mes + "\n\n")
 		debug_mes = ""

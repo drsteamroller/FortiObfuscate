@@ -568,19 +568,11 @@ def obf_on_submit(progress: ttk.Progressbar):
         append_mstr_dicts()
         set_repl_dicts()
 
-        print_mstr_dicts()
-        print_child_proc_dicts()
-
     for num, (src, dst) in enumerate(save_fedwalk_for_last):
         fedwalk.mainloop(opflags, src, dst, debug_log)
         print(f"[FEDWALK] - {src} obfuscated and written to {dst}")
     
     for src in aggressive_fedwalk:
-
-        set_repl_dicts()
-        print_mstr_dicts()
-        print_child_proc_dicts()
-
         fedwalk.mainloop(opflags, src, src, debug_log)
         print(f"[FEDWALK] - Additional pass through on {src}, overwritten in place")
     
