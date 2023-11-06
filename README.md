@@ -32,4 +32,4 @@ fedwalk: this program specifically only looks for ip address patterns, and will 
 
 ### Bringing both program types together
 
-There is now an option dubbed 'Aggressive' mode which affects files in the configs, syslogs, and pcaps folders. After an initial, normal passthrough of these files with the corresponding subroutines, the program will feed the obfuscated outputs into the fedwalk program to catch any lines that may have been missed.
+There is now an option dubbed 'Aggressive' mode which affects files in the configs, syslogs, and pcaps folders. After an initial, normal passthrough of these files with the corresponding subroutines, the program will feed the obfuscated outputs into the fedwalk program to *potentially* catch any lines that may have been missed.
