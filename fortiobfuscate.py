@@ -769,15 +769,15 @@ def viewMap(event):
     print("Master Dictionaries:\n\n>>> IP Addresses")
 
     for k,v in ip_repl_mstr.items():
-        print(f"{k} -> {v}",end='')
+        print(f"{k} -> {v}")
 
     print("\n>>> MAC Addresses")
     for k,v in mac_repl_mstr.items():
-        print(f"{k} -> {v}",end='')
+        print(f"{k} -> {v}")
 
     print("\n>>> Strings")
     for k,v in str_repl_mstr.items():
-        print(f"{k} -> {v}", end='')
+        print(f"{k} -> {v}")
     
     print("\n")
 

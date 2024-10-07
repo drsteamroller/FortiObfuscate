@@ -262,7 +262,6 @@ def obfuscate(conf):
         # Prescrub cert check (omit everything in certificate config sections)
         if CERT and not ('end' in content):
             content = ""
-            continue
 
         elif CERT and 'end' in content:
             CERT = False
