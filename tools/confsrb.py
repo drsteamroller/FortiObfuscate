@@ -147,11 +147,6 @@ def replace_ip6(ip):
         return ip
 
 def salt():
-    t = int( time.time() * 1000.0 )
-    random.seed( ((t & 0xff000000) >> 24) +
-             ((t & 0x00ff0000) >>  8) +
-             ((t & 0x0000ff00) <<  8) +
-             ((t & 0x000000ff) << 24))
     return random.randint(2,8)
 
 def replace_str(s):
@@ -220,6 +215,20 @@ def showMap(op):
     else:
         print("\nUnknown option\n")
 
+# Helper function to identify if 'edit' is at the beginning of the line
+def edit_in_beginning(c: str) -> bool:
+    if not '-el' in opflags:
+        return False
+    if len(c) < 4:
+        return False
+
+    edit_slice = c.strip()[:4]
+
+    if 'edit' in edit_slice:
+        return True
+    else:
+        return False
+
 # Obfuscation main fuction
 def obfuscate(conf):
 
@@ -235,11 +244,12 @@ def obfuscate(conf):
     is_ip6 = re.compile(ipaddr6, re.MULTILINE)
 
     # Flags to look for "edit <name>" within snmp/vpn/VDOM config
-    VDOM = False
-    SNMP = False
+    VDOM       = False
+    SNMP       = False
     SNMP_HOSTS = False
-    IPSEC_P1 = False
-    IPSEC_P2 = False
+    IPSEC_P1   = False
+    IPSEC_P2   = False
+    CERT       = False
 
     # Parse through the list containing the lines of the configuration file
     for i, content in enumerate(conf):
@@ -249,8 +259,21 @@ def obfuscate(conf):
         if re.search('\S', content):
             leading = " " * re.search('\S', content).start()
         
+        # Prescrub cert check (omit everything in certificate config sections)
+        if CERT and not ('end' in content):
+            content = ""
+            continue
+
+        elif CERT and 'end' in content:
+            CERT = False
+            continue
+
         # If we see certain values containing potentially sensitive strings, replace them
-        if ("set hostname" in content or "set alias" in content or "description" in content or 'set vdom' in content):
+        if ("set hostname" in content or 
+            "set alias" in content or 
+            "description" in content or 
+            'set vdom' in content or 
+            'set name' in content):
             l = []
             name_o = ""
             name_r = ""
@@ -265,12 +288,29 @@ def obfuscate(conf):
                 name_r = f"{replace_str(l[2])}"
                 l[2] = f"{name_r}\n"
             except IndexError:
-                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i+1}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tline #{i+1}: \"{content}\"\n"
             else:
-                debug_mes += f"[CONF] \\set hostname | alias | description\\ statement enountered and replaced at line #{i}\n\t{name_o}  ->  {name_r}\n"
+                debug_mes += f"[CONF] \\set hostname | alias | description | name\\ statement enountered and replaced at line #{i+1}\n\t{name_o}  ->  {name_r}\n"
                 content = leading + "{} {} {}".format(l[0], l[1], l[2])            
+
+        if edit_in_beginning(content):
+            l = []
+            name_o = ""
+            name_r = ""
+            try:
+                l = content.strip().split(" ")
+                name_o = l[-1].strip("\n")
+                name_r = f"{replace_str(l[-1])}"
+                l[-1] = f"{name_r}\n"
+            except IndexError:
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i+1}: \"{content}\"\n"
+            except Exception as e:
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tline #{i+1}: \"{content}\"\n"
+            else:
+                debug_mes += f"[CONF] \\set hostname | edit\\ statement enountered and replaced at line #{i+1}\n\t{name_o}  ->  {name_r}\n"
+                content = leading + "{} {}".format(l[0], l[-1])
 
         # If we see an IP address, check if it's public, and if so, replace it
         if (is_ip4.search(content)):
@@ -323,11 +363,11 @@ def obfuscate(conf):
                         g[b + 2] = replace_ip6(ip)
                 leading += " ".join(g)
             except IndexError:
-                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i+1}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i+1}: \"{content}\"\n"
             else:
-                debug_mes += f"[CONF] \\IPv6 address REGEX encountered\\ statement enountered and replaced at line #{i}\n\t{ip_o}  ->  {ip_r}\n"
+                debug_mes += f"[CONF] \\IPv6 address REGEX encountered\\ statement enountered and replaced at line #{i+1}\n\t{ip_o}  ->  {ip_r}\n"
                 content = leading + "\n"
         
         # special case catch
@@ -343,17 +383,17 @@ def obfuscate(conf):
                 s[2] = replace_str(s[2])
                 leading += " ".join(s)                
             except IndexError:
-                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i+1}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i+1}: \"{content}\"\n"
             else:
-                debug_mes += f"[CONF] \\management-ip\\ statement enountered and replaced at line #{i}\n\t{name}  ->  {replace_str(s[2])}\n"
+                debug_mes += f"[CONF] \\management-ip\\ statement enountered and replaced at line #{i+1}\n\t{name}  ->  {replace_str(s[2])}\n"
                 content = leading + "\n"
 
         # General replacement
         if 'set comment' in content:
             content = leading + 'set comment ""\n'
-            debug_mes += f"[CONF] \\set comment\\ statement encountered and erased at line #{i}\n"
+            debug_mes += f"[CONF] \\set comment\\ statement encountered and erased at line #{i+1}\n"
 
         # Specific KEY-VALUE pair search:
         if "config vdom" in content:
@@ -372,20 +412,25 @@ def obfuscate(conf):
                 s[1] = replace_str(s[1])
                 leading += " ".join(s)                
             except IndexError:
-                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i+1}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tline #{i+1}: \"{content}\"\n"
             else:
-                debug_mes += f"[CONF] \\vdom > 'edit'\\ statement enountered and replaced at line #{i}\n\t{name}  ->  {replace_str(s[1])}\n"
+                debug_mes += f"[CONF] \\vdom > 'edit'\\ statement enountered and replaced at line #{i+1}\n\t{name}  ->  {replace_str(s[1])}\n"
                 content = leading + "\n"
 
         if VDOM and 'end' in content:
             VDOM = False
             continue
 
+        ### Certificates ###
+        if ('config vpn certificate' in content):
+            CERT = True
+
         ### SNMP Communities ###
         if ("config system snmp community" in content or "config system snmp user" in content):
             SNMP = True
+            continue
         
         if (not SNMP_HOSTS and SNMP and "edit" in content):
             s = []
@@ -398,11 +443,11 @@ def obfuscate(conf):
                 
                 leading += " ".join(s)
             except IndexError:
-                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i+1}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tline #{i+1}: \"{content}\"\n"
             else:
-                debug_mes += f"[CONF] \\snmp | snmp_hosts > 'edit'\\ statement enountered and replaced at line #{i}\n\t{s[1]}  ->  {replace_str(name)}\n"
+                debug_mes += f"[CONF] \\snmp | snmp_hosts > 'edit'\\ statement enountered and replaced at line #{i+1}\n\t{s[1]}  ->  {replace_str(name)}\n"
                 content = leading + "\n"
 
         if (SNMP and "config hosts" in content):
@@ -419,11 +464,11 @@ def obfuscate(conf):
 
                 leading += " ".join(s)
             except IndexError:
-                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i+1}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tline #{i+1}: \"{content}\"\n"
             else:
-                debug_mes += f"[CONF] \\SNMPv3 config hosts > 'edit'\\ statement enountered and replaced at line #{i}\n\t{s[1]}  ->  {replace_str(name)}\n"
+                debug_mes += f"[CONF] \\SNMPv3 config hosts > 'edit'\\ statement enountered and replaced at line #{i+1}\n\t{s[1]}  ->  {replace_str(name)}\n"
                 content = leading + "\n"
 
         if (SNMP and "name" in content):
@@ -434,11 +479,11 @@ def obfuscate(conf):
                 name = s[2]
                 leading += f'{s[0]} {s[1]} {replace_str(name)}\n'
             except IndexError:
-                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i+1}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tline #{i+1}: \"{content}\"\n"
             else:
-                debug_mes += f"[CONF] \\SNMP edit name\\ statement enountered and replaced at line #{i}\n\t{s[2]}  ->  {replace_str(name)}\n"
+                debug_mes += f"[CONF] \\SNMP edit name\\ statement enountered and replaced at line #{i+1}\n\t{s[2]}  ->  {replace_str(name)}\n"
                 content = leading
 
         if (SNMP_HOSTS and "end" in content):
@@ -464,11 +509,11 @@ def obfuscate(conf):
                 
                 leading += f'{v[0]} {v[1]} {repl}\n'
             except IndexError:
-                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i+1}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tline #{i+1}: \"{content}\"\n"
             else:
-                debug_mes += f"[CONF] \\IPSEC P1 set remotegw-ddns\\ statement enountered and replaced at line #{i}\n\t{v[2]}  ->  {repl}\n"
+                debug_mes += f"[CONF] \\IPSEC P1 set remotegw-ddns\\ statement enountered and replaced at line #{i+1}\n\t{v[2]}  ->  {repl}\n"
                 content = leading
 
         if (IPSEC_P1 and "edit" in content):
@@ -480,11 +525,11 @@ def obfuscate(conf):
 
                 leading += f"{v[0]} {repl}\n"
             except IndexError:
-                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i+1}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tline #{i+1}: \"{content}\"\n"
             else:
-                debug_mes += f"[CONF] \\IPSEC P1 edit\\ statement enountered and replaced at line #{i}\n\t{v[1]}  ->  {repl}\n"
+                debug_mes += f"[CONF] \\IPSEC P1 edit\\ statement enountered and replaced at line #{i+1}\n\t{v[1]}  ->  {repl}\n"
                 content = leading
             
         if (IPSEC_P2 and "edit" in content):
@@ -496,11 +541,11 @@ def obfuscate(conf):
 
                 leading += f"{v[0]} {repl}\n"
             except IndexError:
-                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i+1}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tline #{i+1}: \"{content}\"\n"
             else:
-                debug_mes += f"[CONF] \\IPSEC P2 edit\\ statement enountered and replaced at line #{i}\n\t{v[1]}  ->  {repl}\n"
+                debug_mes += f"[CONF] \\IPSEC P2 edit\\ statement enountered and replaced at line #{i+1}\n\t{v[1]}  ->  {repl}\n"
                 content = leading
         
         if (IPSEC_P2 and "set phase1name" in content):
@@ -512,11 +557,11 @@ def obfuscate(conf):
                 
                 leading += f"{v[0]} {v[1]} {repl}\n"
             except IndexError:
-                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ configuration file is not formatted correctly, index out of bounds\n\tMalformed line {i+1}: \"{content}\"\n"
             except Exception as e:
-                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tLine #{i}: \"{content}\"\n"
+                debug_mes += f"[CONF] \\ERROR\\ something unexpected happened\n\tError {e}\n\tline #{i+1}: \"{content}\"\n"
             else:
-                debug_mes += f"[CONF] \\IPSEC P2 set phase1name\\ statement enountered and replaced at line #{i}\n\t{v[2]}  ->  {repl}\n"
+                debug_mes += f"[CONF] \\IPSEC P2 set phase1name\\ statement enountered and replaced at line #{i+1}\n\t{v[2]}  ->  {repl}\n"
                 content = leading
 
         if (IPSEC_P1 and "end" in content):
@@ -530,6 +575,12 @@ def obfuscate(conf):
     return conf
 
 def mainLoop(args: list, src_path: str, dst_path: str, debug_log : __file__):
+
+    t = int( time.time() * 1000.0 )
+    random.seed( ((t & 0xff000000) >> 24) +
+             ((t & 0x00ff0000) >>  8) +
+             ((t & 0x0000ff00) <<  8) +
+             ((t & 0x000000ff) << 24))
 
     contents.clear()
     global opflags

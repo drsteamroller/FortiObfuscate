@@ -16,7 +16,18 @@ try:
     import tools.pcapsrb as pcap
 except ImportError as e:
     print(f"You must download the entire package from GitHub, and download all dependencies:\n {e}")
-    sys.exit()
+    sys.exit(2)
+
+### Disclaimer ###
+
+ack = input("\
+You are about to run the FortiObfuscate scrubbing script. This script does not scrub every sensitive value 100 percent of the time\n\
+Always perform a manual review before submitting any material to any person(s) outside of Fortinet Federal, Inc.\n\
+Type 'I acknowledge' to proceed\n\
+>>>  ")
+
+if not('I acknowledge' in ack):
+    sys.exit(1)
 
 ip_repl_mstr = {}
 mac_repl_mstr = {}
@@ -60,7 +71,7 @@ def importMap(filename):
                 imp_str = True
             else:
                 print("Map file is improperly formatted, do not make changes to the map file unless you know what you are doing")
-                sys.exit(1)
+                sys.exit(3)
             continue
         
         # Skip this line if it is empty
@@ -151,7 +162,7 @@ def getFiles(dirTree):
             files.extend([f'{dir}{slash}{i}' for i in next(os.walk(dir))[2]])
             if f'{dir}{slash}{args[0]}' in files:
                 print(f"\nERROR: You cannot perform fortiobfuscate on a directory containing itself\n\nexiting...\n")
-                sys.exit()
+                sys.exit(4)
         except TypeError as e:
             print(f"Encountered {e} at directory {dir}")
     
@@ -416,6 +427,11 @@ def update_opflags(txt : str):
             opflags.remove('-agg')
         else:
             opflags.append('-agg')
+    elif "Scrub Edit Lines" in txt:
+        if '-el' in opflags:
+            opflags.remove('-el')
+        else:
+            opflags.append('-el')
 
 def update_args(button_txt : str, update_label : tk.Label):
     """
@@ -609,13 +625,13 @@ args = sys.argv
 
 if len(args) < 2:
     print("Usage:\n\tpython fortiobfuscate.py <directory> [options]")
-    sys.exit()
+    sys.exit(5)
 
 if args[1] == "-h":
     print("Options")
     for k,v in options.items():
         print(f"{k} : {v}")
-    sys.exit()
+    sys.exit(-1)
 
 else:
     og_workspace = args[1]
@@ -691,8 +707,6 @@ preserveIP_button.grid(column=0, row=0)
 preserveSTR_button = ttk.Button(buttonarr, command=lambda : update_args("Preserve Strings", current_selected_args), text="Preserve Strings")
 preserveSTR_button.grid(column=1, row=0)
 
-#preserveMAC_button (NFR)
-
 scrubpayload_button = ttk.Button(buttonarr, command=lambda : update_args("Scrub PCAP Payloads", current_selected_args), text="Scrub PCAP payloads")
 scrubpayload_button.grid(column=0, row=1)
 
@@ -701,6 +715,9 @@ scrubprivateIPs_button.grid(column=1, row=1)
 
 aggressiveReplacement_button = ttk.Button(buttonarr, command=lambda : update_args("Aggressive Replacement", current_selected_args), text="Aggressive Replacement (Experimental)")
 aggressiveReplacement_button.grid(column=0, row=2)
+
+editLines_button = ttk.Button(buttonarr, command=lambda : update_args("Scrub Edit Lines", current_selected_args), text="Scrub Edit Lines")
+editLines_button.grid(column=1, row=2)
 
 allOps = ttk.Combobox(buttonarr, values=combox_options)
 
