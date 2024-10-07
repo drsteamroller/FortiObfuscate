@@ -381,7 +381,8 @@ Option Buttons:\n\
         'Preserve Strings' = Do not perform scrubbing of strings (usernames, device names, etc)\n\
         'Scrub PCAP Payloads' = Scrubs the upper layer protocol payloads (some, not all)\n\
         'Scrub Private IPs' = Replaces RFC-1918 IP addresses with a randomize /16 address\n\
-        'Aggressive Replacement' = Enables fedwalk to do a second runthrough of all 'conf', 'syslog', and 'pcap' selected files\n\n\
+        'Aggressive Replacement' = Enables fedwalk to do a second runthrough of all 'conf', 'syslog', and 'pcap' selected files\n\
+        'Scrub Edit Lines' = Scrub each and every line containing the 'edit' prefix\n\n\
 The Submit button will perform the associated obfuscation operations on the files listed based on the selection and\n\
 with respect to the arguments chosen\n\n\
 To turn on Debug (detailed logs) mode: press <F12> when on the main screen of the program"
